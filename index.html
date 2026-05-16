@@ -6,11 +6,11 @@
     <title>Excel Mastery Suite 2026</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <style>
-        /* 2026 Modern UI/UX Variables */
+        /* Modern 2026 UI Variables */
         :root {
             --bg-base: #fafafa;
             --surface: #ffffff;
-            --primary: #0f6cbd; /* MS365 Modern Blue */
+            --primary: #0f6cbd; 
             --primary-hover: #0c5393;
             --text-main: #242424;
             --text-muted: #616161;
@@ -23,43 +23,40 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, sans-serif; }
-
         body { background-color: var(--bg-base); color: var(--text-main); font-size: 13px; height: 100vh; display: flex; flex-direction: column; }
 
-        /* Sleek Header */
-        .header { background: var(--surface); padding: 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 12px; }
+        /* Header */
+        .header { background: var(--surface); padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 12px; }
         .header-icon { background: linear-gradient(135deg, #107c41, #185abd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 24px; font-weight: bold; }
         .header-text h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
         .header-text p { font-size: 11px; color: var(--text-muted); }
 
-        /* Modern Segmented Control (Tabs) */
+        /* Tabs */
         .nav-container { padding: 12px 16px; background: var(--surface); }
         .tabs { display: flex; background: var(--bg-base); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); }
         .tab-btn { flex: 1; padding: 8px 4px; background: transparent; border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
         .tab-btn:hover { color: var(--text-main); }
         .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; }
 
-        /* Workspace & Cards */
+        /* Workspace */
         .workspace { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
         .tab-content.active { display: block; }
         
         .card { background: var(--surface); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-subtle); margin-bottom: 16px; }
-        .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;}
         .card p.desc { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
 
-        /* Form Elements */
+        /* Forms */
         .form-group { margin-bottom: 12px; }
         label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        select, input[type="text"] { width: 100%; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-base); font-size: 13px; color: var(--text-main); transition: var(--transition); outline: none; }
+        select, input[type="text"] { width: 100%; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-base); font-size: 13px; color: var(--text-main); outline: none; transition: var(--transition); }
         select:focus, input[type="text"]:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 2px rgba(15, 108, 189, 0.1); }
         
-        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .checkbox-item:last-child { border-bottom: none; }
+        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; }
         .checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; }
-        .checkbox-item span { font-size: 13px; }
 
-        /* Modern Buttons */
+        /* Buttons */
         .btn { width: 100%; padding: 10px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
@@ -67,14 +64,17 @@
         .btn-secondary:hover { background: #f0f0f0; }
 
         .flex-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        
+        /* Formula Box */
+        .formula-result { background: #f3f2f1; padding: 12px; border-radius: var(--radius-md); border-left: 4px solid var(--primary); font-family: monospace; font-size: 12px; margin-bottom: 12px; display: none; word-wrap: break-word; }
+        .formula-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: none; }
 
         /* Status Pills */
-        #status-area { position: fixed; bottom: 16px; left: 16px; right: 16px; display: none; padding: 12px; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; text-align: center; animation: slideUp 0.3s ease; z-index: 100; box-shadow: var(--shadow-md); }
+        #status-area { position: fixed; bottom: 16px; left: 16px; right: 16px; display: none; padding: 12px; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; text-align: center; z-index: 100; box-shadow: var(--shadow-md); }
         .status-success { background: #dff6dd; color: #107c41; border: 1px solid #c7e0c4; }
         .status-error { background: #fde7e9; color: #a80000; border: 1px solid #e1c0c3; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -92,7 +92,7 @@
             <button class="tab-btn active" onclick="switchTab('pivot-tab')">Pivot</button>
             <button class="tab-btn" onclick="switchTab('recon-tab')">Reconcile</button>
             <button class="tab-btn" onclick="switchTab('clean-tab')">Cleanse</button>
-            <button class="tab-btn" onclick="switchTab('extract-tab')">Extract</button>
+            <button class="tab-btn" onclick="switchTab('formula-tab')">Formulas</button>
         </div>
     </div>
 
@@ -100,30 +100,15 @@
         
         <div id="pivot-tab" class="tab-content active">
             <div class="card">
-                <h2>✨ Dynamic Pivot Generator</h2>
-                <p class="desc">Highlight your data table (including headers) and click load to build a custom summary.</p>
-                
+                <h2>✨ Dynamic Pivot</h2>
+                <p class="desc">Highlight your data table (with headers) and load to build.</p>
                 <button class="btn btn-secondary" onclick="loadPivotHeaders()" style="margin-bottom: 16px;">📥 Load Data Headers</button>
-
-                <div class="form-group">
-                    <label>Group By (Rows)</label>
-                    <select id="pivot-row-select"><option>Load headers first...</option></select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Value to Summarize</label>
-                    <select id="pivot-val-select"><option>Load headers first...</option></select>
-                </div>
-
+                <div class="form-group"><label>Group By (Rows)</label><select id="pivot-row-select"><option>Load headers first...</option></select></div>
+                <div class="form-group"><label>Value to Summarize</label><select id="pivot-val-select"><option>Load headers first...</option></select></div>
                 <div class="form-group">
                     <label>Aggregation Method</label>
-                    <select id="pivot-agg-select">
-                        <option value="Sum">Sum</option>
-                        <option value="Count">Count</option>
-                        <option value="Average">Average</option>
-                    </select>
+                    <select id="pivot-agg-select"><option value="Sum">Sum</option><option value="Count">Count</option><option value="Average">Average</option></select>
                 </div>
-                
                 <button class="btn btn-primary" onclick="executeDynamicPivot()">Generate Summary</button>
             </div>
         </div>
@@ -131,52 +116,63 @@
         <div id="recon-tab" class="tab-content">
             <div class="card">
                 <h2>⚖️ Invoice & Data Matcher</h2>
-                <p class="desc">Highlight Range A (e.g., your records) and Range B (e.g., vendor records) across any sheets to find exact matches, missing items, and fuzzy similarities.</p>
-                
+                <p class="desc">Highlight Range A, click Set. Highlight Range B, click Set.</p>
                 <div class="flex-row">
                     <button class="btn btn-secondary" onclick="setReconRange('A')">Set List A</button>
                     <input type="text" id="range-a-display" placeholder="No range selected" disabled>
                 </div>
-                
                 <div class="flex-row">
                     <button class="btn btn-secondary" onclick="setReconRange('B')">Set List B</button>
                     <input type="text" id="range-b-display" placeholder="No range selected" disabled>
                 </div>
-
                 <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">Run Reconciliation Report</button>
             </div>
         </div>
 
         <div id="clean-tab" class="tab-content">
             <div class="card">
-                <h2>🧹 Smart Cleansing</h2>
-                <p class="desc">Select messy data to normalize formats instantly.</p>
-                
+                <h2>🧹 Format Selection</h2>
+                <div class="form-group">
+                    <label>Text Casing</label>
+                    <select id="clean-case">
+                        <option value="none">Don't Change Casing</option>
+                        <option value="proper">Proper Case (Capitalize Words)</option>
+                        <option value="upper">UPPER CASE</option>
+                        <option value="lower">lower case</option>
+                    </select>
+                </div>
                 <label class="checkbox-item"><input type="checkbox" id="clean-trim" checked><span>Trim excess spaces</span></label>
-                <label class="checkbox-item"><input type="checkbox" id="clean-case"><span>Proper Case capitalization</span></label>
                 <label class="checkbox-item"><input type="checkbox" id="clean-accounting"><span>Format as Accounting</span></label>
                 <label class="checkbox-item"><input type="checkbox" id="clean-autofit" checked><span>Auto-fit column widths</span></label>
-                
-                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 16px;">Clean Selection</button>
+                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">Clean Selection</button>
+            </div>
+
+            <div class="card">
+                <h2>A Fonts (Whole Sheet)</h2>
+                <div class="form-group">
+                    <select id="sheet-font">
+                        <option value="Calibri">Calibri (Modern Default)</option>
+                        <option value="Calisto MT">Calisto MT (Classic Serif)</option>
+                        <option value="Times New Roman">Times New Roman (Formal)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="applySheetFont()">Apply Font to Sheet</button>
             </div>
         </div>
 
-        <div id="extract-tab" class="tab-content">
+        <div id="formula-tab" class="tab-content">
             <div class="card">
-                <h2>🎯 Entity Extractor</h2>
-                <p class="desc">Select a column of messy text blocks to instantly extract specific data types into the adjacent column.</p>
-                
+                <h2>💡 Formula Finder</h2>
+                <p class="desc">Describe what you want to do (e.g. "search for a value", "add conditionally", "combine text").</p>
                 <div class="form-group">
-                    <label>Target Entity</label>
-                    <select id="extract-type">
-                        <option value="email">Email Addresses</option>
-                        <option value="phone">Phone Numbers</option>
-                        <option value="url">Website URLs</option>
-                        <option value="numbers">Only Numbers</option>
-                    </select>
+                    <input type="text" id="formula-search" placeholder="E.g. find a value, count blanks...">
                 </div>
+                <button class="btn btn-secondary" onclick="searchFormula()" style="margin-bottom: 16px;">🔍 Find Formula</button>
                 
-                <button class="btn btn-primary" onclick="executeExtraction()">Extract Data</button>
+                <div id="f-desc" class="formula-desc"></div>
+                <div id="f-result" class="formula-result"></div>
+                
+                <button id="f-insert-btn" class="btn btn-primary" onclick="insertFormula()" style="display:none;">📥 Insert into Active Cell</button>
             </div>
         </div>
 
@@ -185,13 +181,8 @@
     <div id="status-area"></div>
 
     <script>
-        Office.onReady((info) => {
-            if (info.host === Office.HostType.Excel) {
-                console.log("Mastery Suite 2026 Engine Online.");
-            }
-        });
+        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online."); });
 
-        /* UI Navigation */
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -205,77 +196,59 @@
             el.innerText = msg;
             el.className = isError ? 'status-error' : 'status-success';
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 5000);
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
         }
 
-        /* --- STATE MEMORY --- */
+        /* --- PIVOT --- */
         let pivotRangeAddress = "";
-        let reconRangeA = null; // { sheet: "Sheet1", address: "A1:A10" }
-        let reconRangeB = null;
-
-        /* --- 1. DYNAMIC PIVOT ENGINE --- */
         async function loadPivotHeaders() {
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
                     range.load(["address", "values"]);
                     await context.sync();
-
                     pivotRangeAddress = range.address;
                     const headers = range.values[0];
-
                     const rowSelect = document.getElementById('pivot-row-select');
                     const valSelect = document.getElementById('pivot-val-select');
                     rowSelect.innerHTML = ""; valSelect.innerHTML = "";
-
-                    headers.forEach((header, index) => {
-                        let safeHeader = header || `Column ${index + 1}`;
-                        rowSelect.innerHTML += `<option value="${safeHeader}">${safeHeader}</option>`;
-                        valSelect.innerHTML += `<option value="${safeHeader}">${safeHeader}</option>`;
+                    headers.forEach((h, i) => {
+                        let safeH = h || `Column ${i + 1}`;
+                        rowSelect.innerHTML += `<option value="${safeH}">${safeH}</option>`;
+                        valSelect.innerHTML += `<option value="${safeH}">${safeH}</option>`;
                     });
-                    
-                    showStatus("Headers loaded! Select your configuration.");
+                    showStatus("Headers loaded!");
                 });
-            } catch (error) {
-                showStatus("Error: Please select a table block that includes headers.", true);
-            }
+            } catch (error) { showStatus("Error: Select a table block with headers.", true); }
         }
 
         async function executeDynamicPivot() {
-            if (!pivotRangeAddress) { showStatus("Please load data headers first.", true); return; }
+            if (!pivotRangeAddress) { showStatus("Load headers first.", true); return; }
             try {
                 await Excel.run(async (context) => {
                     const rowField = document.getElementById('pivot-row-select').value;
                     const valField = document.getElementById('pivot-val-select').value;
                     const aggType = document.getElementById('pivot-agg-select').value;
-
                     const activeSheet = context.workbook.getActiveWorksheet();
                     const sourceRange = activeSheet.getRange(pivotRangeAddress.split("!")[1]);
-                    
                     const targetSheet = context.workbook.worksheets.add("Summary_" + Math.floor(Math.random()*1000));
-                    const pivotTables = targetSheet.pivotTables;
-                    const newPivot = pivotTables.add("DynamicPivot", sourceRange, targetSheet.getRange("B3"));
+                    const newPivot = targetSheet.pivotTables.add("DynPivot", sourceRange, targetSheet.getRange("B3"));
                     await context.sync();
-
-                    // Structure
                     newPivot.rowHierarchies.add(newPivot.hierarchies.getItem(rowField));
                     let dataHier = newPivot.dataHierarchies.add(newPivot.hierarchies.getItem(valField));
-                    
                     if (aggType === "Sum") dataHier.summarizeBy = Excel.AggregationFunction.sum;
                     if (aggType === "Count") dataHier.summarizeBy = Excel.AggregationFunction.count;
                     if (aggType === "Average") dataHier.summarizeBy = Excel.AggregationFunction.average;
-
                     targetSheet.activate();
                     targetSheet.getRange("B:C").format.autofitColumns();
                     await context.sync();
-                    showStatus("Dynamic Pivot successfully generated.");
+                    showStatus("Summary generated.");
                 });
-            } catch (error) {
-                showStatus("Pivot Engine Error: " + error.message, true);
-            }
+            } catch (error) { showStatus("Pivot Error: " + error.message, true); }
         }
 
-        /* --- 2. CROSS-SHEET RECONCILIATION ENGINE --- */
+        /* --- RECONCILE --- */
+        let reconRangeA = null; let reconRangeB = null;
         async function setReconRange(listId) {
             try {
                 await Excel.run(async (context) => {
@@ -283,41 +256,33 @@
                     const sheet = context.workbook.getActiveWorksheet();
                     range.load("address"); sheet.load("name");
                     await context.sync();
-
                     let data = { sheetName: sheet.name, address: range.address.split("!")[1] };
-                    
                     if (listId === 'A') { reconRangeA = data; document.getElementById('range-a-display').value = `${sheet.name}!${data.address}`; }
                     if (listId === 'B') { reconRangeB = data; document.getElementById('range-b-display').value = `${sheet.name}!${data.address}`; }
                 });
-            } catch (error) { showStatus("Selection error.", true); }
+            } catch (error) { showStatus("Select cells first, not a chart or shape.", true); }
         }
 
         async function executeReconciliation() {
-            if (!reconRangeA || !reconRangeB) { showStatus("Please set both List A and List B.", true); return; }
-            showStatus("Analyzing data...");
+            if (!reconRangeA || !reconRangeB) { showStatus("Set both A and B.", true); return; }
+            showStatus("Running reconciliation...");
             try {
                 await Excel.run(async (context) => {
                     const sheetA = context.workbook.worksheets.getItem(reconRangeA.sheetName);
                     const rangeA = sheetA.getRange(reconRangeA.address);
                     rangeA.load("values");
-
                     const sheetB = context.workbook.worksheets.getItem(reconRangeB.sheetName);
                     const rangeB = sheetB.getRange(reconRangeB.address);
                     rangeB.load("values");
-                    
                     await context.sync();
 
-                    // Flatten lists and clean spaces/casing for matching
-                    let listA = rangeA.values.map(row => String(row[0] || "")).filter(val => val.trim() !== "");
-                    let listB = rangeB.values.map(row => String(row[0] || "")).filter(val => val.trim() !== "");
-                    
+                    let listA = rangeA.values.map(r => String(r[0] || "")).filter(v => v.trim() !== "");
+                    let listB = rangeB.values.map(r => String(r[0] || "")).filter(v => v.trim() !== "");
                     let cleanA = listA.map(v => v.trim().toLowerCase());
                     let cleanB = listB.map(v => v.trim().toLowerCase());
+                    let report = [["Item from List A", "Status / Found in B"]];
 
-                    let report = [["Item from List A", "Status / Match Found in B"]];
-
-                    // Quick Levenshtein for fuzzy (used if exact match fails)
-                    function getLevenshteinDist(s1, s2) {
+                    function getLev(s1, s2) {
                         let m = s1.length, n = s2.length;
                         let d = Array.from({length: m+1}, () => Array(n+1).fill(0));
                         for(let i=0; i<=m; i++) d[i][0] = i;
@@ -328,121 +293,129 @@
                                 d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + cost);
                             }
                         }
-                        return maxLen = Math.max(m, n) === 0 ? 1 : 1 - (d[m][n] / Math.max(m, n));
+                        return Math.max(m, n) === 0 ? 1 : 1 - (d[m][n] / Math.max(m, n));
                     }
 
                     for (let i = 0; i < listA.length; i++) {
-                        let originalA = listA[i];
-                        let searchA = cleanA[i];
-                        
-                        if (cleanB.includes(searchA)) {
-                            report.push([originalA, "✅ Exact Match"]);
+                        if (cleanB.includes(cleanA[i])) {
+                            report.push([listA[i], "✅ Exact Match"]);
                         } else {
-                            // Check for fuzzy match
-                            let bestFuzzy = ""; let maxScore = 0;
+                            let best = ""; let max = 0;
                             for (let j = 0; j < listB.length; j++) {
-                                let score = getLevenshteinDist(searchA, cleanB[j]);
-                                if (score > maxScore) { maxScore = score; bestFuzzy = listB[j]; }
+                                let score = getLev(cleanA[i], cleanB[j]);
+                                if (score > max) { max = score; best = listB[j]; }
                             }
-                            if (maxScore >= 0.8) {
-                                report.push([originalA, `⚠️ Fuzzy Match (80%+): ${bestFuzzy}`]);
-                            } else {
-                                report.push([originalA, "❌ Missing in List B"]);
-                            }
+                            if (max >= 0.8) report.push([listA[i], `⚠️ Fuzzy Match: ${best}`]);
+                            else report.push([listA[i], "❌ Missing in List B"]);
                         }
                     }
-
-                    // Check for items in B missing in A
                     for (let i = 0; i < listB.length; i++) {
-                        if (!cleanA.includes(cleanB[i])) {
-                            report.push([`[From B] ${listB[i]}`, "❌ Missing in List A"]);
-                        }
+                        if (!cleanA.includes(cleanB[i])) report.push([`[B] ${listB[i]}`, "❌ Missing in List A"]);
                     }
 
-                    const targetSheet = context.workbook.worksheets.add("ReconReport_" + Math.floor(Math.random()*1000));
-                    const outputRange = targetSheet.getRangeByIndexes(1, 1, report.length, 2);
-                    outputRange.values = report;
-                    
-                    // Format Report
-                    targetSheet.getRange("B2:C2").format.font.bold = true;
-                    outputRange.format.autofitColumns();
-                    targetSheet.activate();
-                    
+                    const tSheet = context.workbook.worksheets.add("ReconReport_" + Math.floor(Math.random()*1000));
+                    const oRange = tSheet.getRangeByIndexes(1, 1, report.length, 2);
+                    oRange.values = report;
+                    tSheet.getRange("B2:C2").format.font.bold = true;
+                    oRange.format.autofitColumns();
+                    tSheet.activate();
                     await context.sync();
                     showStatus("Reconciliation complete.");
                 });
-            } catch (error) { showStatus("Recon Error: " + error.message, true); }
+            } catch (error) { showStatus("Ensure both sheets still exist.", true); }
         }
 
-        /* --- 3. CLEANING ENGINE --- */
+        /* --- CLEANSE & FONT --- */
         async function executeDataCleaning() {
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
-                    range.load(["values", "address"]);
+                    range.load("values");
                     await context.sync();
-
                     let values = range.values;
+                    const casing = document.getElementById('clean-case').value;
                     const doTrim = document.getElementById('clean-trim').checked;
-                    const doCase = document.getElementById('clean-case').checked;
-                    const doAccounting = document.getElementById('clean-accounting').checked;
-                    const doAutofit = document.getElementById('clean-autofit').checked;
-
+                    const doAcct = document.getElementById('clean-accounting').checked;
+                    
                     for (let r = 0; r < values.length; r++) {
                         for (let c = 0; c < values[0].length; c++) {
                             let val = values[r][c];
                             if (typeof val === "string") {
                                 if (doTrim) val = val.trim().replace(/\s+/g, ' ');
-                                if (doCase) val = val.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+                                if (casing === 'upper') val = val.toUpperCase();
+                                else if (casing === 'lower') val = val.toLowerCase();
+                                else if (casing === 'proper') val = val.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
                                 values[r][c] = val;
                             }
                         }
                     }
                     range.values = values;
-                    if (doAccounting) range.numberFormat = "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)";
-                    if (doAutofit) { range.format.autofitColumns(); range.format.autofitRows(); }
-                    
+                    if (doAcct) range.numberFormat = "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)";
+                    if (document.getElementById('clean-autofit').checked) { range.format.autofitColumns(); range.format.autofitRows(); }
                     await context.sync();
-                    showStatus("Data normalized successfully.");
+                    showStatus("Data formatted.");
                 });
             } catch (error) { showStatus("Error: " + error.message, true); }
         }
 
-        /* --- 4. SMART EXTRACTOR ENGINE --- */
-        async function executeExtraction() {
+        async function applySheetFont() {
+            try {
+                await Excel.run(async (context) => {
+                    const sheet = context.workbook.worksheets.getActiveWorksheet();
+                    // Using getUsedRange prevents memory crashing on 17 billion empty cells
+                    const range = sheet.getUsedRange(); 
+                    const fontName = document.getElementById('sheet-font').value;
+                    range.format.font.name = fontName;
+                    await context.sync();
+                    showStatus(`Font changed to ${fontName}.`);
+                });
+            } catch (error) { showStatus("Error applying font.", true); }
+        }
+
+        /* --- FORMULA FINDER --- */
+        const fDB = [
+            { t: ["search", "find", "lookup", "vlookup", "xlookup", "match"], f: "=XLOOKUP(lookup_value, lookup_array, return_array, \"Not Found\")", d: "Modern way to search for a value and return a match." },
+            { t: ["sum conditions", "add if", "total multiple"], f: "=SUMIFS(sum_range, criteria_range1, criteria1)", d: "Adds up numbers based on multiple conditions." },
+            { t: ["count conditions", "tally if", "how many"], f: "=COUNTIFS(criteria_range1, criteria1)", d: "Counts cells that meet specific conditions." },
+            { t: ["if error", "hide error", "blank error"], f: "=IFERROR(value, \"\")", d: "Returns a blank or custom text if a formula results in an error." },
+            { t: ["combine text", "join", "merge", "concat"], f: "=TEXTJOIN(\", \", TRUE, text1, text2)", d: "Combines text from multiple cells with a comma separator." },
+            { t: ["if", "condition", "logic", "check"], f: "=IF(logical_test, value_if_true, value_if_false)", d: "Checks if a condition is met." },
+            { t: ["days between", "difference dates"], f: "=NETWORKDAYS(start_date, end_date)", d: "Calculates total working days between two dates." },
+            { t: ["unique", "remove duplicates", "distinct"], f: "=UNIQUE(array)", d: "Returns a list of unique values from a range." },
+            { t: ["drop down", "filter", "sort"], f: "=FILTER(array, include)", d: "Filters a range of data based on criteria you define." }
+        ];
+
+        let currentFormula = "";
+
+        function searchFormula() {
+            let input = document.getElementById('formula-search').value.toLowerCase();
+            if (!input) return;
+            
+            let bestMatch = fDB[5]; // Default to 'IF'
+            let maxMatches = 0;
+
+            fDB.forEach(item => {
+                let matches = item.t.filter(term => input.includes(term)).length;
+                if (matches > maxMatches) { maxMatches = matches; bestMatch = item; }
+            });
+
+            currentFormula = bestMatch.f;
+            document.getElementById('f-desc').innerText = bestMatch.d;
+            document.getElementById('f-result').innerText = bestMatch.f;
+            document.getElementById('f-desc').style.display = 'block';
+            document.getElementById('f-result').style.display = 'block';
+            document.getElementById('f-insert-btn').style.display = 'flex';
+        }
+
+        async function insertFormula() {
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
-                    range.load(["values", "rowIndex", "columnIndex", "rowCount"]);
+                    range.formulas = [[currentFormula]];
                     await context.sync();
-
-                    const type = document.getElementById('extract-type').value;
-                    let values = range.values;
-                    let output = [];
-
-                    // Regex Patterns
-                    const patterns = {
-                        email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-                        phone: /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
-                        url: /https?:\/\/[^\s]+/g,
-                        numbers: /\d+/g
-                    };
-
-                    for (let r = 0; r < values.length; r++) {
-                        let text = String(values[r][0] || "");
-                        let matches = text.match(patterns[type]);
-                        output.push([matches ? matches.join(", ") : ""]);
-                    }
-
-                    const sheet = context.workbook.getActiveWorksheet();
-                    const outRange = sheet.getRangeByIndexes(range.rowIndex, range.columnIndex + 1, range.rowCount, 1);
-                    outRange.values = output;
-                    outRange.format.autofitColumns();
-
-                    await context.sync();
-                    showStatus("Entities extracted to adjacent column.");
+                    showStatus("Formula inserted. Double click cell to edit ranges.");
                 });
-            } catch (error) { showStatus("Select a single column. " + error.message, true); }
+            } catch (error) { showStatus("Error inserting formula.", true); }
         }
     </script>
 </body>
