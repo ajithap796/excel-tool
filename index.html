@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Mastery Toolkit</title>
+    <!-- Microsoft Office.js SDK -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+        :root {
+            --excel-primary: #107c41;
+            --excel-dark: #0b5930;
+            --excel-light: #f3fbf6;
+            --bg-color: #f9f9f9;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --accent-color: #2b579a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header Accent Banner */
+        .header-banner {
+            background: linear-gradient(135deg, var(--excel-primary), var(--excel-dark));
+            color: white;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-banner h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header-banner p {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            color: var(--excel-primary);
+            background-color: #fcfcfc;
+        }
+
+        .tab-btn.active {
+            color: var(--excel-primary);
+            border-bottom-color: var(--excel-primary);
+            background-color: var(--excel-light);
+        }
+
+        /* Main Content Workspace */
+        .workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Feature Layout Patterns */
+        h2 {
+            font-size: 15px;
+            color: #222;
+            margin-bottom: 12px;
+            font-weight: 600;
+            border-left: 4px solid var(--excel-primary);
+            padding-left: 8px;
+        }
+
+        .instruction-box {
+            background-color: #f0f4f8;
+            border-left: 4px solid var(--accent-color);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            color: #444;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: #555;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+            margin-bottom: 8px;
+            background: white;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .checkbox-label input {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--excel-primary);
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: white;
+            font-size: 13px;
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-value {
+            font-weight: bold;
+            min-width: 35px;
+            text-align: right;
+        }
+
+        /* Call-To-Action Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--excel-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.15s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--excel-dark);
+        }
+
+        /* Status Toast Notification */
+        #status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .status-success {
+            background-color: #e2f6ea;
+            color: #107c41;
+            border: 1px solid #a3e1bc;
+        }
+
+        .status-error {
+            background-color: #fde8e8;
+            color: #9b1c1c;
+            border: 1px solid #f8b4b4;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Branding Banner -->
+    <div class="header-banner">
+        <h1>Excel Mastery Toolkit</h1>
+        <p>Advanced Productivity & Automation Suite</p>
+    </div>
+
+    <!-- Navigation Tabs System -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('clean-tab')">Clean Data</button>
+        <button class="tab-btn" onclick="switchTab('fuzzy-tab')">Fuzzy Match</button>
+        <button class="tab-btn" onclick="switchTab('pivot-tab')">Auto Pivot</button>
+    </div>
+
+    <!-- Content Workspace -->
+    <div class="workspace">
+        
+        <!-- MODULE 1: DATA CLEANER -->
+        <div id="clean-tab" class="tab-content active">
+            <h2>Data Scrubbing Engine</h2>
+            <div class="instruction-box">
+                Select any range of dirty text or messy values directly within your sheet, check the desired rules below, and process.
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="clean-trim" checked>
+                    <span>Trim spaces (Removes leading, trailing, and extra double spaces)</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="clean-case">
+                    <span>Convert to Proper Case (Capitalizes First Letters)</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="clean-blanks">
+                    <span>Convert empty/whitespace cells to true BLANKs</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="clean-nonprint">
+                    <span>Strip non-printable ASCII characters</span>
+                </label>
+            </div>
+            
+            <button class="btn-primary" onclick="executeDataCleaning()">Run Data Cleaner</button>
+        </div>
+
+        <!-- MODULE 2: FUZZY LOOKUP -->
+        <div id="fuzzy-tab" class="tab-content">
+            <h2>Fuzzy Match Analytics</h2>
+            <div class="instruction-box">
+                Compares text string approximations across columns. Highlight a 2-column selection context (Column A = Source, Column B = Target).
+            </div>
+            
+            <div class="form-group">
+                <label for="match-sensitivity">Match Sensitivity Threshold</label>
+                <div class="range-container">
+                    <input type="range" id="match-sensitivity" min="50" max="100" value="80" oninput="updateRangeLabel(this.value)">
+                    <div class="range-value" id="range-val-display">80%</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="match-algorithm">Fuzzy Matching Algorithm</label>
+                <select id="match-algorithm">
+                    <option value="levenshtein">Levenshtein Distance Matrix</option>
+                    <option value="dice">Sørensen–Dice Coefficient</option>
+                </select>
+            </div>
+            
+            <button class="btn-primary" onclick="executeFuzzyLookup()">Compute Fuzzy Similarities</button>
+        </div>
+
+        <!-- MODULE 3: AUTOMATED PIVOTS -->
+        <div id="pivot-tab" class="tab-content">
+            <h2>Insta-Pivot Deployer</h2>
+            <div class="instruction-box">
+                Select your raw transaction matrix or standard structural tabular dataset block, then instantly deploy pre-configured summaries.
+            </div>
+            
+            <div class="form-group">
+                <label for="pivot-style">Desired Analytical Architecture</label>
+                <select id="pivot-style">
+                    <option value="sales">Sales Matrix (Rows: Region/Rep, Sum: Total)</option>
+                    <option value="temporal">Temporal Timeline (Rows: Date, Columns: Category)</option>
+                    <option value="count">Density Distribution (Rows: Item, Count: Frequency)</option>
+                </select>
+            </div>
+            
+            <button class="btn-primary" onclick="executeAutoPivot()">Deploy Dashboard Pivot</button>
+        </div>
+
+        <!-- System Notification Architecture -->
+        <div id="status-message"></div>
+    </div>
+
+    <!-- Scripting Logic Engine Implementation -->
+    <script>
+        // Core Office Platform Bootstrapper Connection
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.Excel) {
+                console.log("Excel Mastery Tool initialization complete. Secure interface pipeline linked.");
+            }
+        });
+
+        // Interface Tab Controller
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            clearStatus();
+        }
+
+        // Realtime slider label updating
+        function updateRangeLabel(val) {
+            document.getElementById('range-val-display').innerText = val + '%';
+        }
+
+        // Status Management Helper UI Functions
+        function showStatus(text, isError = false) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.innerText = text;
+            statusEl.className = isError ? 'status-error' : 'status-success';
+            statusEl.style.display = 'block';
+        }
+
+        function clearStatus() {
+            document.getElementById('status-message').style.display = 'none';
+        }
+
+        /* ----------------------------------------------------
+           ENGINE CODE MODULE 1: TEXT SCRUBBING & STRING TRIMMING
+           ---------------------------------------------------- */
+        async function executeDataCleaning() {
+            clearStatus();
+            try {
+                await Excel.run(async (context) => {
+                    const range = context.workbook.getSelectedRange();
+                    range.load(["values", "address"]);
+                    await context.sync();
+
+                    let values = range.values;
+                    let rowsCount = values.length;
+                    let colsCount = values[0].length;
+                    let modifiedCounter = 0;
+
+                    // Read user interface parameter selections
+                    const doTrim = document.getElementById('clean-trim').checked;
+                    const doCase = document.getElementById('clean-case').checked;
+                    const doBlanks = document.getElementById('clean-blanks').checked;
+                    const doNonPrint = document.getElementById('clean-nonprint').checked;
+
+                    // String operations map iterator
+                    for (let r = 0; r < rowsCount; r++) {
+                        for (let c = 0; c < colsCount; c++) {
+                            let cellVal = values[r][c];
+                            if (typeof cellVal === "string") {
+                                let original = cellVal;
+                                
+                                if (doTrim) {
+                                    cellVal = cellVal.trim().replace(/\s+/g, ' ');
+                                }
+                                if (doNonPrint) {
+                                    cellVal = cellVal.replace(/[^ -~]/g, '');
+                                }
+                                if (doCase) {
+                                    cellVal = cellVal.toLowerCase().replace(/\w/g, s => s.toUpperCase());
+                                }
+                                if (doBlanks && cellVal.trim() === "") {
+                                    cellVal = "";
+                                }
+
+                                if (cellVal !== original) {
+                                    values[r][c] = cellVal;
+                                    modifiedCounter++;
+                                }
+                            } else if (doBlanks && (cellVal === null || cellVal === undefined)) {
+                                values[r][c] = "";
+                            }
+                        }
+                    }
+
+                    if (modifiedCounter > 0) {
+                        range.values = values;
+                        await context.sync();
+                        showStatus(`Success! Cleaned and updated ${modifiedCounter} text cells.`);
+                    } else {
+                        showStatus("Scan finished. No text mutations matched your transformation filters.");
+                    }
+                });
+            } catch (error) {
+                showStatus("Error reading active spreadsheet selection matrix: " + error.message, true);
+            }
+        }
+
+        /* ----------------------------------------------------
+           ENGINE CODE MODULE 2: EMBEDDED FUZZY MATCH ANALYTICS
+           ---------------------------------------------------- */
+        async function executeFuzzyLookup() {
+            clearStatus();
+            try {
+                await Excel.run(async (context) => {
+                    const range = context.workbook.getSelectedRange();
+                    range.load(["values", "address", "columnIndex", "rowIndex", "rowCount", "columnCount"]);
+                    await context.sync();
+
+                    if (range.columnCount < 2) {
+                        showStatus("Operational layout error: Please select a block spanning at least TWO columns.", true);
+                        return;
+                    }
+
+                    const threshold = parseInt(document.getElementById('match-sensitivity').value) / 100;
+                    const algo = document.getElementById('match-algorithm').value;
+                    let values = range.values;
+
+                    // Append similarity results to the direct right of the active range selection
+                    const sheet = context.workbook.getActiveWorksheet();
+                    let outputRange = sheet.getRangeByIndexes(
+                        range.rowIndex, 
+                        range.columnIndex + range.columnCount, 
+                        range.rowCount, 
+                        2
+                    );
+
+                    let outputData = [["Fuzzy Best Match Target", "Confidence Score"]];
+
+                    // Baseline local Dice Similarity implementation for string structures
+                    function computeDiceCoefficient(str1, str2) {
+                        s1 = String(str1).toLowerCase().replace(/\s+/g, '');
+                        s2 = String(str2).toLowerCase().replace(/\s+/g, '');
+                        if (s1 === s2) return 1.0;
+                        if (s1.length < 2 || s2.length < 2) return 0.0;
+
+                        let bigrams1 = new Map();
+                        for (let i = 0; i < s1.length - 1; i++) {
+                            let bigram = s1.substr(i, 2);
+                            bigrams1.set(bigram, (bigrams1.get(bigram) || 0) + 1);
+                        }
+
+                        let intersection = 0;
+                        for (let i = 0; i < s2.length - 1; i++) {
+                            let bigram = s2.substr(i, 2);
+                            if (bigrams1.has(bigram) && bigrams1.get(bigram) > 0) {
+                                intersection++;
+                                bigrams1.set(bigram, bigrams1.get(bigram) - 1);
+                            }
+                        }
+                        return (2.0 * intersection) / (s1.length + s2.length - 2);
+                    }
+
+                    // Standard Levenshtein Distance Matrix Converter
+                    function computeLevenshteinScore(str1, str2) {
+                        s1 = String(str1).toLowerCase();
+                        s2 = String(str2).toLowerCase();
+                        let m = s1.length, n = s2.length;
+                        let d = Array.from({length: m+1}, () => Array(n+1).fill(0));
+                        for(let i=0; i<=m; i++) d[i][0] = i;
+                        for(let j=0; j<=n; j++) d[0][j] = j;
+
+                        for(let j=1; j<=n; j++) {
+                            for(let i=1; i<=m; i++) {
+                                let cost = (s1[i-1] === s2[j-1]) ? 0 : 1;
+                                d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + cost);
+                            }
+                        }
+                        let maxLen = Math.max(m, n);
+                        return maxLen === 0 ? 1.0 : (1.0 - (d[m][n] / maxLen));
+                    }
+
+                    // Iterative cross-product score evaluator matching Column 1 to Column 2
+                    for (let i = 1; i < values.length; i++) {
+                        let sourceItem = values[i][0];
+                        let bestMatch = "N/A";
+                        let maxScore = 0;
+
+                        for (let j = 1; j < values.length; j++) {
+                            let targetItem = values[j][1];
+                            let score = (algo === 'dice') ? 
+                                         computeDiceCoefficient(sourceItem, targetItem) : 
+                                         computeLevenshteinScore(sourceItem, targetItem);
+                            if (score > maxScore) {
+                                maxScore = score;
+                                bestMatch = targetItem;
+                            }
+                        }
+
+                        if (maxScore >= threshold) {
+                            outputData.push([bestMatch, (maxScore * 100).toFixed(1) + "%"]);
+                        } else {
+                            outputData.push(["[Below Threshold Match]", "0.0%"]);
+                        }
+                    }
+
+                    outputRange.values = outputData;
+                    outputRange.format.autofitColumns();
+                    await context.sync();
+                    showStatus("Fuzzy cross-matching analysis compiled. Appended results column adjoining data map.");
+                });
+            } catch (error) {
+                showStatus("Error analyzing columns: " + error.message, true);
+            }
+        }
+
+        /* ----------------------------------------------------
+           ENGINE CODE MODULE 3: AUTOMATED PIVOT MATRIX DEPLOYMENT
+           ---------------------------------------------------- */
+        async function executeAutoPivot() {
+            clearStatus();
+            try {
+                await Excel.run(async (context) => {
+                    const activeSheet = context.workbook.getActiveWorksheet();
+                    const selectedRange = context.workbook.getSelectedRange();
+                    selectedRange.load(["address", "worksheet"]);
+                    await context.sync();
+
+                    const configStyle = document.getElementById('pivot-style').value;
+                    
+                    // Create an individual sheet explicitly targeting layout structures
+                    const targetSheet = context.workbook.worksheets.add("MasteryPivot_" + Math.floor(Math.random()*1000));
+                    
+                    // Native Office JS Pivot Layout Creator Engine
+                    const pivotTables = targetSheet.pivotTables;
+                    const pivotTargetCell = targetSheet.getRange("B3");
+                    
+                    const newPivot = pivotTables.add(
+                        "AutomationEnginePivot", 
+                        selectedRange, 
+                        pivotTargetCell
+                    );
+                    
+                    // Structure matrix profiles adaptively matching parameters
+                    if (configStyle === "sales") {
+                        newPivot.rowHierarchies.add(newPivot.hierarchies.getItemAt(0)); // Maps column 1 as Row 
+                        let dataHier = newPivot.dataHierarchies.add(newPivot.hierarchies.getItemAt(newPivot.hierarchies.getCount() - 1)); // Aggregates final column
+                        dataHier.summarizeBy = Excel.AggregationFunction.sum;
+                    } else {
+                        newPivot.rowHierarchies.add(newPivot.hierarchies.getItemAt(0));
+                        let dataHier = newPivot.dataHierarchies.add(newPivot.hierarchies.getItemAt(0));
+                        dataHier.summarizeBy = Excel.AggregationFunction.count;
+                    }
+
+                    targetSheet.activate();
+                    await context.sync();
+                    showStatus("Insta-Pivot deployed successfully onto new structural reporting worksheet.");
+                });
+            } catch (error) {
+                showStatus("Deployment failed: Ensure structural tabular header ranges are completely selected. Details: " + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>
