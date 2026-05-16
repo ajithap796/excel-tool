@@ -67,7 +67,7 @@
     <div class="header">
         <div class="header-icon">✦</div>
         <div class="header-text">
-            <h1>Mastery Suite <span class="version-badge">v3.1.1</span></h1>
+            <h1>Mastery Suite <span class="version-badge">v3.1.2</span></h1>
             <p>Copilot-era Data Operations</p>
         </div>
     </div>
@@ -87,12 +87,12 @@
         <div id="gst-tab" class="tab-content active">
             <div class="card">
                 <h2>📑 GST 2B vs Books Summary</h2>
-                <p class="desc">Instantly deploy a standard format reconciliation statement with pre-built summation and difference formulas.</p>
+                <p class="desc">Deploy a standard reconciliation template. The engine will automatically scan your workbook for "2B" and "Purchase/Accounts" sheets to link the grand totals.</p>
                 <div class="form-group">
                     <label>Output Sheet Name</label>
                     <input type="text" id="gst-sheet-name" value="GST_Reconciliation" placeholder="e.g., May_GST_Reco">
                 </div>
-                <button class="btn btn-primary" onclick="deployGSTSummary()">Deploy Summary Template</button>
+                <button class="btn btn-primary" onclick="deployGSTSummary()">Deploy & Auto-Link</button>
             </div>
         </div>
         
@@ -195,7 +195,7 @@
     <div id="status-area"></div>
 
     <script>
-        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3.1.1."); });
+        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3.1.2."); });
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -213,101 +213,133 @@
             setTimeout(() => { el.style.display = 'none'; }, 6000); 
         }
 
-        /* --- GST SUMMARY DEPLOYER (v3.1.1 NEW) --- */
+        /* --- GST SUMMARY DEPLOYER (v3.1.2 AUTO-LINKING ENGINE) --- */
         async function deployGSTSummary() {
-            showStatus("Building GST Summary...");
+            showStatus("Scanning workbook & building Summary...");
             try {
                 await Excel.run(async (context) => {
                     let rawOutName = document.getElementById('gst-sheet-name').value || "GST_Reconciliation";
                     let outName = rawOutName.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
                     
-                    const sheet = context.workbook.worksheets.add(outName);
+                    const targetSheet = context.workbook.worksheets.add(outName);
                     
-                    // The structural layout of the GST Table
+                    // Step 1: Scan workbook for target sheets
+                    const sheets = context.workbook.worksheets;
+                    sheets.load("items/name");
+                    await context.sync();
+
+                    let name2B = ""; let nameBooks = "";
+                    sheets.items.forEach(s => {
+                        let ln = s.name.toLowerCase();
+                        if (ln.includes("2b")) name2B = s.name;
+                        if (ln.includes("purchase") || ln.includes("book") || ln.includes("account")) nameBooks = s.name;
+                    });
+
+                    // Step 2: Smart Header Locator
+                    async function scanHeaders(sheetName) {
+                        if(!sheetName) return ["", "", "", ""];
+                        try {
+                            let s = context.workbook.worksheets.getItem(sheetName);
+                            let r = s.getRange("A1:Z5"); // Scans top 5 rows
+                            r.load("values");
+                            await context.sync();
+                            let map = ["", "", "", ""];
+                            for(let row=0; row<5; row++) {
+                                for(let col=0; col<26; col++) {
+                                    let val = String(r.values[row][col] || "").toLowerCase().replace(/[^a-z]/g, '');
+                                    let letter = String.fromCharCode(65 + col); // Maps index 0 to A, 1 to B, etc.
+                                    
+                                    if(val.includes("taxable")) map[0] = letter;
+                                    else if(val === "cgst" || val.includes("central")) map[1] = letter;
+                                    else if(val === "sgst" || val.includes("state")) map[2] = letter;
+                                    else if(val === "igst" || val.includes("integrated")) map[3] = letter;
+                                }
+                            }
+                            return map;
+                        } catch(e) { return ["", "", "", ""]; }
+                    }
+
+                    let bMap = await scanHeaders(nameBooks);
+                    let tMap = await scanHeaders(name2B);
+
+                    // Step 3: Build Grid
                     const tableData = [
-                        ["PARTICULARS", "Taxable Value", "CGST", "SGST", "IGST"], // Row 1
-                        ["Input invoices as per accounts (Purchase)", "", "", "", ""], // Row 2
-                        ["Input invoices as per accounts (Expense)", "", "", "", ""], // Row 3
-                        ["Less: Credit note as per accounts", "", "", "", ""], // Row 4
-                        ["Less: RCM Expenses", "", "", "", ""], // Row 5
-                        ["Net input as per accounts", "", "", "", ""], // Row 6 (FORMULA)
-                        ["", "", "", "", ""], // Row 7
-                        ["Add:", "", "", "", ""], // Row 8
-                        ["Input invoices in 2B not in accounts", "", "", "", ""], // Row 9
-                        ["Reverse Charge", "", "", "", ""], // Row 10
-                        ["Expenses", "", "", "", ""], // Row 11
-                        ["Amount Difference In Accounts", "", "", "", ""], // Row 12
-                        ["", "", "", "", ""], // Row 13
-                        ["Less:", "", "", "", ""], // Row 14
-                        ["Input invoices in accounts not in 2B", "", "", "", ""], // Row 15
-                        ["Input invoice Amended", "", "", "", ""], // Row 16
-                        ["", "", "", "", ""], // Row 17
-                        ["Input invoices as per calculation", "", "", "", ""], // Row 18 (FORMULA)
-                        ["Input invoices in 2B", "", "", "", ""], // Row 19
-                        ["Add: Expenses", "", "", "", ""], // Row 20
-                        ["Less: Credit notes in 2B", "", "", "", ""], // Row 21
-                        ["Less: RCM Expense", "", "", "", ""], // Row 22
-                        ["", "", "", "", ""], // Row 23
-                        ["Input invoices as per 2B", "", "", "", ""], // Row 24 (FORMULA)
-                        ["Difference", "", "", "", ""] // Row 25 (FORMULA)
+                        ["PARTICULARS", "Taxable Value", "CGST", "SGST", "IGST"], 
+                        ["Input invoices as per accounts (Purchase)", "", "", "", ""], 
+                        ["Input invoices as per accounts (Expense)", "", "", "", ""], 
+                        ["Less: Credit note as per accounts", "", "", "", ""], 
+                        ["Less: RCM Expenses", "", "", "", ""], 
+                        ["Net input as per accounts", "", "", "", ""], 
+                        ["", "", "", "", ""], 
+                        ["Add:", "", "", "", ""], 
+                        ["Input invoices in 2B not in accounts", "", "", "", ""], 
+                        ["Reverse Charge", "", "", "", ""], 
+                        ["Expenses", "", "", "", ""], 
+                        ["Amount Difference In Accounts", "", "", "", ""], 
+                        ["", "", "", "", ""], 
+                        ["Less:", "", "", "", ""], 
+                        ["Input invoices in accounts not in 2B", "", "", "", ""], 
+                        ["Input invoice Amended", "", "", "", ""], 
+                        ["", "", "", "", ""], 
+                        ["Input invoices as per calculation", "", "", "", ""], 
+                        ["Input invoices in 2B", "", "", "", ""], 
+                        ["Add: Expenses", "", "", "", ""], 
+                        ["Less: Credit notes in 2B", "", "", "", ""], 
+                        ["Less: RCM Expense", "", "", "", ""], 
+                        ["", "", "", "", ""], 
+                        ["Input invoices as per 2B", "", "", "", ""], 
+                        ["Difference", "", "", "", ""] 
                     ];
 
-                    const range = sheet.getRange("A1:E25");
-                    range.values = tableData;
+                    targetSheet.getRange("A1:E25").values = tableData;
 
-                    // Injecting specific summation and logic formulas into the grid
-                    const formulaRange = sheet.getRange("B1:E25");
-                    let formulas = formulaRange.formulas;
+                    // Step 4: Inject Formulas
+                    let newFormulas = Array(25).fill("").map(() => Array(4).fill(""));
                     
-                    // Column B to E loops for formulas (Index 0 is Col B, Index 3 is Col E)
                     for (let c = 0; c < 4; c++) {
-                        let colLetter = String.fromCharCode(66 + c); // B, C, D, E
+                        let colLetter = String.fromCharCode(66 + c); 
                         
-                        // Net input as per accounts
-                        formulas[5][c] = `=SUM(${colLetter}2:${colLetter}3)-${colLetter}4-${colLetter}5`;
-                        
-                        // Input invoices as per calculation
-                        formulas[17][c] = `=${colLetter}6+SUM(${colLetter}9:${colLetter}12)-SUM(${colLetter}15:${colLetter}16)`;
-                        
-                        // Input invoices as per 2B
-                        formulas[23][c] = `=${colLetter}19+${colLetter}20-${colLetter}21-${colLetter}22`;
-                        
-                        // Difference
-                        formulas[24][c] = `=${colLetter}18-${colLetter}24`;
+                        // INJECT AUTO-LINKS IF FOUND
+                        if (nameBooks && bMap[c]) newFormulas[1][c] = `=SUM('${nameBooks}'!${bMap[c]}:${bMap[c]})`;
+                        if (name2B && tMap[c]) newFormulas[18][c] = `=SUM('${name2B}'!${tMap[c]}:${tMap[c]})`;
+
+                        // Built-in structural calculations
+                        newFormulas[5][c] = `=SUM(${colLetter}2:${colLetter}3)-${colLetter}4-${colLetter}5`;
+                        newFormulas[17][c] = `=${colLetter}6+SUM(${colLetter}9:${colLetter}12)-SUM(${colLetter}15:${colLetter}16)`;
+                        newFormulas[23][c] = `=${colLetter}19+${colLetter}20-${colLetter}21-${colLetter}22`;
+                        newFormulas[24][c] = `=${colLetter}18-${colLetter}24`;
                     }
-                    formulaRange.formulas = formulas;
-
-                    // Formatting the template
-                    sheet.getRange("A1:E1").format.font.bold = true;
-                    sheet.getRange("A1:E1").format.borders.getItem('EdgeBottom').style = 'Continuous';
                     
-                    sheet.getRange("A6:E6").format.font.bold = true; // Net Input
-                    sheet.getRange("A18:E18").format.font.bold = true; // As per calc
-                    sheet.getRange("A24:E25").format.font.bold = true; // As per 2b & Diff
+                    targetSheet.getRange("B1:E25").formulas = newFormulas;
+
+                    // Step 5: Formatting
+                    targetSheet.getRange("A1:E1").format.font.bold = true;
+                    targetSheet.getRange("A1:E1").format.borders.getItem('EdgeBottom').style = 'Continuous';
+                    targetSheet.getRange("A6:E6").format.font.bold = true; 
+                    targetSheet.getRange("A18:E18").format.font.bold = true; 
+                    targetSheet.getRange("A24:E25").format.font.bold = true; 
                     
-                    // Light gray backgrounds for formula rows
-                    sheet.getRange("A6:E6").format.fill.color = "#f3f2f1";
-                    sheet.getRange("A18:E18").format.fill.color = "#f3f2f1";
-                    sheet.getRange("A24:E25").format.fill.color = "#f3f2f1";
+                    targetSheet.getRange("A6:E6").format.fill.color = "#f3f2f1";
+                    targetSheet.getRange("A18:E18").format.fill.color = "#f3f2f1";
+                    targetSheet.getRange("A24:E25").format.fill.color = "#f3f2f1";
 
-                    // Apply Accounting format to all number columns
-                    sheet.getRange("B2:E25").numberFormat = "_(* #,##0.00_);_(* (#,##0.00);_(* \"-\"??_);_(@_)";
-
-                    sheet.getRange("A:E").format.autofitColumns();
-                    sheet.activate();
+                    targetSheet.getRange("B2:E25").numberFormat = "_(* #,##0.00_);_(* (#,##0.00);_(* \"-\"??_);_(@_)";
+                    targetSheet.getRange("A:E").format.autofitColumns();
+                    targetSheet.activate();
                     await context.sync();
                     
-                    showStatus("GST Reconciliation Template Deployed Successfully.");
+                    // Success Message indicating what was found
+                    let linkMsg = (name2B || nameBooks) ? ` Auto-linked ${nameBooks ? `'${nameBooks}'` : ""} ${name2B ? `& '${name2B}'` : ""}.` : " (No matching sheets found for auto-link).";
+                    showStatus("Template Deployed!" + linkMsg);
                 });
             } catch (error) { 
                 if (error.message.includes("ItemAlreadyExists")) {
-                    showStatus("Error: A sheet with that name already exists. Please rename and try again.", true);
+                    showStatus("Error: Sheet exists. Rename and try again.", true);
                 } else {
                     showStatus("Deployment Error: " + error.message, true); 
                 }
             }
         }
-
 
         /* --- PIVOT --- */
         let pivotRangeAddress = "";
@@ -494,7 +526,7 @@
                         }
                     }
                     range.values = values;
-                    if (doAcct) range.numberFormat = "_($* #,##0.00_);_($* (#,##0.00);_($* \"-\"??_);_(@_)";
+                    if (doAcct) range.numberFormat = "_(* #,##0.00_);_(* (#,##0.00);_(* \"-\"??_);_(@_)";
                     if (document.getElementById('clean-autofit').checked) { range.format.autofitColumns(); range.format.autofitRows(); }
                     await context.sync();
                     showStatus("Data formatted.");
