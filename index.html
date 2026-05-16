@@ -67,7 +67,7 @@
     <div class="header">
         <div class="header-icon">✦</div>
         <div class="header-text">
-            <h1>Mastery Suite <span class="version-badge">v3.0</span></h1>
+            <h1>Mastery Suite <span class="version-badge">v3.1</span></h1>
             <p>Copilot-era Data Operations</p>
         </div>
     </div>
@@ -101,15 +101,31 @@
         <div id="recon-tab" class="tab-content">
             <div class="card">
                 <h2>⚖️ Invoice & Data Matcher</h2>
-                <p class="desc">Highlight Range A, click Set. Highlight Range B, click Set.</p>
-                <div class="flex-row">
-                    <button class="btn btn-secondary" onclick="setReconRange('A')">Set List A</button>
-                    <input type="text" id="range-a-display" placeholder="No range selected" disabled>
+                <p class="desc">Customize your list names, select your ranges, and compare.</p>
+                
+                <div class="form-group">
+                    <label>List A Name</label>
+                    <input type="text" id="name-a" value="Internal Data" placeholder="e.g., Tally Export">
+                    <div class="flex-row" style="margin-top: 8px;">
+                        <button class="btn btn-secondary" onclick="setReconRange('A')">Set Range A</button>
+                        <input type="text" id="range-a-display" placeholder="No range selected" disabled>
+                    </div>
                 </div>
-                <div class="flex-row">
-                    <button class="btn btn-secondary" onclick="setReconRange('B')">Set List B</button>
-                    <input type="text" id="range-b-display" placeholder="No range selected" disabled>
+
+                <div class="form-group">
+                    <label>List B Name</label>
+                    <input type="text" id="name-b" value="Vendor Data" placeholder="e.g., GST Portal">
+                    <div class="flex-row" style="margin-top: 8px;">
+                        <button class="btn btn-secondary" onclick="setReconRange('B')">Set Range B</button>
+                        <input type="text" id="range-b-display" placeholder="No range selected" disabled>
+                    </div>
                 </div>
+
+                <div class="form-group">
+                    <label>Output Sheet Name</label>
+                    <input type="text" id="recon-sheet-name" value="Recon_Report" placeholder="Name the new sheet">
+                </div>
+
                 <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">Run Reconciliation Report</button>
             </div>
         </div>
@@ -166,7 +182,7 @@
     <div id="status-area"></div>
 
     <script>
-        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3."); });
+        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3.1."); });
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -263,10 +279,18 @@
         }
 
         async function executeReconciliation() {
-            if (!reconRangeA || !reconRangeB) { showStatus("Set both A and B.", true); return; }
+            if (!reconRangeA || !reconRangeB) { showStatus("Set both Range A and Range B.", true); return; }
             showStatus("Running reconciliation...");
             try {
                 await Excel.run(async (context) => {
+                    // Pull custom names from UI
+                    const nameA = document.getElementById('name-a').value || "List A";
+                    const nameB = document.getElementById('name-b').value || "List B";
+                    
+                    // Sanitize Output Sheet Name to prevent Excel crashes (max 31 chars, no special symbols)
+                    let rawOutName = document.getElementById('recon-sheet-name').value || "ReconReport";
+                    let outName = rawOutName.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
+                    
                     const sheetA = context.workbook.worksheets.getItem(reconRangeA.sheetName);
                     const rangeA = sheetA.getRange(reconRangeA.address);
                     rangeA.load("values");
@@ -281,7 +305,9 @@
                     let listB = rangeB.values.map(r => String(r[0] || "")).filter(v => v.trim() !== "");
                     let cleanA = listA.map(v => v.trim().toLowerCase());
                     let cleanB = listB.map(v => v.trim().toLowerCase());
-                    let report = [["Item from List A", "Status / Found in B"]];
+                    
+                    // Use custom names in report headers
+                    let report = [[`Item from ${nameA}`, `Status / Found in ${nameB}`]];
 
                     function getLev(s1, s2) {
                         let m = s1.length, n = s2.length;
@@ -307,14 +333,15 @@
                                 if (score > max) { max = score; best = listB[j]; }
                             }
                             if (max >= 0.8) report.push([listA[i], `⚠️ Fuzzy Match: ${best}`]);
-                            else report.push([listA[i], "❌ Missing in List B"]);
+                            else report.push([listA[i], `❌ Missing in ${nameB}`]);
                         }
                     }
                     for (let i = 0; i < listB.length; i++) {
-                        if (!cleanA.includes(cleanB[i])) report.push([`[B] ${listB[i]}`, "❌ Missing in List A"]);
+                        if (!cleanA.includes(cleanB[i])) report.push([`[${nameB}] ${listB[i]}`, `❌ Missing in ${nameA}`]);
                     }
 
-                    const tSheet = context.workbook.worksheets.add("Recon_" + Math.floor(Math.random()*10000));
+                    // Create the new sheet using the custom sanitized name
+                    const tSheet = context.workbook.worksheets.add(outName);
                     const oRange = tSheet.getRangeByIndexes(1, 1, report.length, 2);
                     oRange.values = report;
                     tSheet.getRange("B2:C2").format.font.bold = true;
@@ -323,7 +350,13 @@
                     await context.sync();
                     showStatus("Reconciliation complete.");
                 });
-            } catch (error) { showStatus("Recon Engine Error: " + error.message, true); }
+            } catch (error) { 
+                if (error.message.includes("ItemAlreadyExists")) {
+                    showStatus("Sheet name already exists! Please change the Output Sheet Name and try again.", true);
+                } else {
+                    showStatus("Recon Engine Error: " + error.message, true); 
+                }
+            }
         }
 
         /* --- CLEANSE & FONT --- */
@@ -417,7 +450,6 @@
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
-                    // Hardened: Ensures it only pastes into the top-left selected cell to prevent array mismatch crashes
                     range.getCell(0,0).formulas = [[currentFormula]];
                     await context.sync();
                     showStatus("Formula inserted! Double click cell to edit.");
