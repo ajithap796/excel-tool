@@ -6,39 +6,28 @@
     <title>Excel Mastery Suite 2026</title>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <style>
-        /* Modern 2026 UI Variables */
         :root {
-            --bg-base: #fafafa;
-            --surface: #ffffff;
-            --primary: #0f6cbd; 
-            --primary-hover: #0c5393;
-            --text-main: #242424;
-            --text-muted: #616161;
-            --border-subtle: #edebe9;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-            --transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --bg-base: #fafafa; --surface: #ffffff; --primary: #0f6cbd; --primary-hover: #0c5393;
+            --text-main: #242424; --text-muted: #616161; --border-subtle: #edebe9;
+            --radius-md: 8px; --radius-lg: 12px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.2s ease;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif; }
         body { background-color: var(--bg-base); color: var(--text-main); font-size: 13px; height: 100vh; display: flex; flex-direction: column; }
 
-        /* Header */
         .header { background: var(--surface); padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 12px; }
         .header-icon { background: linear-gradient(135deg, #107c41, #185abd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 24px; font-weight: bold; }
         .header-text h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
         .header-text p { font-size: 11px; color: var(--text-muted); }
+        .version-badge { background: #e1dfdd; color: #323130; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
 
-        /* Tabs */
         .nav-container { padding: 12px 16px; background: var(--surface); }
         .tabs { display: flex; background: var(--bg-base); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); }
         .tab-btn { flex: 1; padding: 8px 4px; background: transparent; border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
         .tab-btn:hover { color: var(--text-main); }
         .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; }
 
-        /* Workspace */
         .workspace { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
         .tab-content.active { display: block; }
@@ -47,7 +36,6 @@
         .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;}
         .card p.desc { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
 
-        /* Forms */
         .form-group { margin-bottom: 12px; }
         label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         select, input[type="text"] { width: 100%; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-base); font-size: 13px; color: var(--text-main); outline: none; transition: var(--transition); }
@@ -56,20 +44,17 @@
         .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; }
         .checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; }
 
-        /* Buttons */
         .btn { width: 100%; padding: 10px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-md); }
         .btn-secondary { background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-subtle); }
         .btn-secondary:hover { background: #f0f0f0; }
 
         .flex-row { display: flex; gap: 8px; margin-bottom: 12px; }
         
-        /* Formula Box */
         .formula-result { background: #f3f2f1; padding: 12px; border-radius: var(--radius-md); border-left: 4px solid var(--primary); font-family: monospace; font-size: 12px; margin-bottom: 12px; display: none; word-wrap: break-word; }
         .formula-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: none; }
 
-        /* Status Pills */
         #status-area { position: fixed; bottom: 16px; left: 16px; right: 16px; display: none; padding: 12px; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; text-align: center; z-index: 100; box-shadow: var(--shadow-md); }
         .status-success { background: #dff6dd; color: #107c41; border: 1px solid #c7e0c4; }
         .status-error { background: #fde7e9; color: #a80000; border: 1px solid #e1c0c3; }
@@ -82,7 +67,7 @@
     <div class="header">
         <div class="header-icon">✦</div>
         <div class="header-text">
-            <h1>Mastery Suite</h1>
+            <h1>Mastery Suite <span class="version-badge">v3.0</span></h1>
             <p>Copilot-era Data Operations</p>
         </div>
     </div>
@@ -181,7 +166,7 @@
     <div id="status-area"></div>
 
     <script>
-        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online."); });
+        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3."); });
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -196,7 +181,7 @@
             el.innerText = msg;
             el.className = isError ? 'status-error' : 'status-success';
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 5000); // Gives you 5 seconds to read errors
+            setTimeout(() => { el.style.display = 'none'; }, 6000); 
         }
 
         /* --- PIVOT --- */
@@ -207,6 +192,12 @@
                     const range = context.workbook.getSelectedRange();
                     range.load(["address", "values"]);
                     await context.sync();
+                    
+                    if (!range.values || range.values.length === 0) {
+                        showStatus("Error: No data found in selection.", true);
+                        return;
+                    }
+                    
                     pivotRangeAddress = range.address;
                     const headers = range.values[0];
                     const rowSelect = document.getElementById('pivot-row-select');
@@ -219,7 +210,7 @@
                     });
                     showStatus("Headers loaded!");
                 });
-            } catch (error) { showStatus("Error: Select a table block with headers. " + error.message, true); }
+            } catch (error) { showStatus("Header Load Error: " + error.message, true); }
         }
 
         async function executeDynamicPivot() {
@@ -230,12 +221,12 @@
                     const valField = document.getElementById('pivot-val-select').value;
                     const aggType = document.getElementById('pivot-agg-select').value;
                     
-                    // FIXED TYPO HERE: added .worksheets
                     const activeSheet = context.workbook.worksheets.getActiveWorksheet();
                     const sourceRange = activeSheet.getRange(pivotRangeAddress.split("!")[1]);
-                    const targetSheet = context.workbook.worksheets.add("Summary_" + Math.floor(Math.random()*1000));
+                    const targetSheet = context.workbook.worksheets.add("Summary_" + Math.floor(Math.random()*10000));
                     
-                    const newPivot = targetSheet.pivotTables.add("DynPivot", sourceRange, targetSheet.getRange("B3"));
+                    const pivotName = "Pivot_" + Math.floor(Math.random()*10000);
+                    const newPivot = targetSheet.pivotTables.add(pivotName, sourceRange, targetSheet.getRange("B3"));
                     await context.sync();
                     
                     newPivot.rowHierarchies.add(newPivot.hierarchies.getItem(rowField));
@@ -259,7 +250,6 @@
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
-                    // FIXED TYPO HERE: added .worksheets
                     const sheet = context.workbook.worksheets.getActiveWorksheet();
                     
                     range.load("address"); sheet.load("name");
@@ -269,7 +259,7 @@
                     if (listId === 'A') { reconRangeA = data; document.getElementById('range-a-display').value = `${sheet.name}!${data.address}`; }
                     if (listId === 'B') { reconRangeB = data; document.getElementById('range-b-display').value = `${sheet.name}!${data.address}`; }
                 });
-            } catch (error) { showStatus("Error saving range: " + error.message, true); }
+            } catch (error) { showStatus("Set Range Error: " + error.message, true); }
         }
 
         async function executeReconciliation() {
@@ -324,7 +314,7 @@
                         if (!cleanA.includes(cleanB[i])) report.push([`[B] ${listB[i]}`, "❌ Missing in List A"]);
                     }
 
-                    const tSheet = context.workbook.worksheets.add("ReconReport_" + Math.floor(Math.random()*1000));
+                    const tSheet = context.workbook.worksheets.add("Recon_" + Math.floor(Math.random()*10000));
                     const oRange = tSheet.getRangeByIndexes(1, 1, report.length, 2);
                     oRange.values = report;
                     tSheet.getRange("B2:C2").format.font.bold = true;
@@ -356,7 +346,6 @@
                                 if (casing === 'upper') val = val.toUpperCase();
                                 else if (casing === 'lower') val = val.toLowerCase();
                                 else if (casing === 'proper') {
-                                    // Robust proper case logic
                                     let words = val.toLowerCase().split(" ");
                                     for (let i = 0; i < words.length; i++) {
                                         if (words[i].length > 0) words[i] = words[i].charAt(0).toUpperCase() + words[i].substring(1);
@@ -386,7 +375,7 @@
                     await context.sync();
                     showStatus(`Entire active sheet changed to ${fontName}.`);
                 });
-            } catch (error) { showStatus("Error applying font: " + error.message, true); }
+            } catch (error) { showStatus("Font Error: " + error.message, true); }
         }
 
         /* --- FORMULA FINDER --- */
@@ -428,11 +417,12 @@
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
-                    range.formulas = [[currentFormula]];
+                    // Hardened: Ensures it only pastes into the top-left selected cell to prevent array mismatch crashes
+                    range.getCell(0,0).formulas = [[currentFormula]];
                     await context.sync();
-                    showStatus("Formula inserted. Double click cell to edit ranges.");
+                    showStatus("Formula inserted! Double click cell to edit.");
                 });
-            } catch (error) { showStatus("Error inserting formula: " + error.message, true); }
+            } catch (error) { showStatus("Insert Error: " + error.message, true); }
         }
     </script>
 </body>
