@@ -22,9 +22,9 @@
         .header-text p { font-size: 11px; color: var(--text-muted); }
         .version-badge { background: #e1dfdd; color: #323130; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
 
-        .nav-container { padding: 12px 16px; background: var(--surface); }
-        .tabs { display: flex; background: var(--bg-base); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); }
-        .tab-btn { flex: 1; padding: 8px 4px; background: transparent; border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
+        .nav-container { padding: 12px 16px; background: var(--surface); overflow-x: auto; }
+        .tabs { display: flex; background: var(--bg-base); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); min-width: max-content; }
+        .tab-btn { flex: 1; padding: 8px 12px; background: transparent; border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); text-align: center; }
         .tab-btn:hover { color: var(--text-main); }
         .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; }
 
@@ -67,23 +67,36 @@
     <div class="header">
         <div class="header-icon">✦</div>
         <div class="header-text">
-            <h1>Mastery Suite <span class="version-badge">v3.1</span></h1>
+            <h1>Mastery Suite <span class="version-badge">v3.1.1</span></h1>
             <p>Copilot-era Data Operations</p>
         </div>
     </div>
 
     <div class="nav-container">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('pivot-tab')">Pivot</button>
-            <button class="tab-btn" onclick="switchTab('recon-tab')">Reconcile</button>
+            <button class="tab-btn active" onclick="switchTab('gst-tab')">GST Reco</button>
+            <button class="tab-btn" onclick="switchTab('pivot-tab')">Pivot</button>
+            <button class="tab-btn" onclick="switchTab('recon-tab')">Match</button>
             <button class="tab-btn" onclick="switchTab('clean-tab')">Cleanse</button>
-            <button class="tab-btn" onclick="switchTab('formula-tab')">Formulas</button>
+            <button class="tab-btn" onclick="switchTab('formula-tab')">Funcs</button>
         </div>
     </div>
 
     <div class="workspace">
+
+        <div id="gst-tab" class="tab-content active">
+            <div class="card">
+                <h2>📑 GST 2B vs Books Summary</h2>
+                <p class="desc">Instantly deploy a standard format reconciliation statement with pre-built summation and difference formulas.</p>
+                <div class="form-group">
+                    <label>Output Sheet Name</label>
+                    <input type="text" id="gst-sheet-name" value="GST_Reconciliation" placeholder="e.g., May_GST_Reco">
+                </div>
+                <button class="btn btn-primary" onclick="deployGSTSummary()">Deploy Summary Template</button>
+            </div>
+        </div>
         
-        <div id="pivot-tab" class="tab-content active">
+        <div id="pivot-tab" class="tab-content">
             <div class="card">
                 <h2>✨ Dynamic Pivot</h2>
                 <p class="desc">Highlight your data table (with headers) and load to build.</p>
@@ -100,7 +113,7 @@
 
         <div id="recon-tab" class="tab-content">
             <div class="card">
-                <h2>⚖️ Invoice & Data Matcher</h2>
+                <h2>⚖️ List Matcher</h2>
                 <p class="desc">Customize your list names, select your ranges, and compare.</p>
                 
                 <div class="form-group">
@@ -114,7 +127,7 @@
 
                 <div class="form-group">
                     <label>List B Name</label>
-                    <input type="text" id="name-b" value="Vendor Data" placeholder="e.g., GST Portal">
+                    <input type="text" id="name-b" value="Vendor Data" placeholder="e.g., Portal">
                     <div class="flex-row" style="margin-top: 8px;">
                         <button class="btn btn-secondary" onclick="setReconRange('B')">Set Range B</button>
                         <input type="text" id="range-b-display" placeholder="No range selected" disabled>
@@ -123,10 +136,10 @@
 
                 <div class="form-group">
                     <label>Output Sheet Name</label>
-                    <input type="text" id="recon-sheet-name" value="Recon_Report" placeholder="Name the new sheet">
+                    <input type="text" id="recon-sheet-name" value="Match_Report" placeholder="Name the new sheet">
                 </div>
 
-                <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">Run Reconciliation Report</button>
+                <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">Run Match Report</button>
             </div>
         </div>
 
@@ -182,7 +195,7 @@
     <div id="status-area"></div>
 
     <script>
-        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3.1."); });
+        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3.1.1."); });
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -199,6 +212,102 @@
             el.style.display = 'block';
             setTimeout(() => { el.style.display = 'none'; }, 6000); 
         }
+
+        /* --- GST SUMMARY DEPLOYER (v3.1.1 NEW) --- */
+        async function deployGSTSummary() {
+            showStatus("Building GST Summary...");
+            try {
+                await Excel.run(async (context) => {
+                    let rawOutName = document.getElementById('gst-sheet-name').value || "GST_Reconciliation";
+                    let outName = rawOutName.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
+                    
+                    const sheet = context.workbook.worksheets.add(outName);
+                    
+                    // The structural layout of the GST Table
+                    const tableData = [
+                        ["PARTICULARS", "Taxable Value", "CGST", "SGST", "IGST"], // Row 1
+                        ["Input invoices as per accounts (Purchase)", "", "", "", ""], // Row 2
+                        ["Input invoices as per accounts (Expense)", "", "", "", ""], // Row 3
+                        ["Less: Credit note as per accounts", "", "", "", ""], // Row 4
+                        ["Less: RCM Expenses", "", "", "", ""], // Row 5
+                        ["Net input as per accounts", "", "", "", ""], // Row 6 (FORMULA)
+                        ["", "", "", "", ""], // Row 7
+                        ["Add:", "", "", "", ""], // Row 8
+                        ["Input invoices in 2B not in accounts", "", "", "", ""], // Row 9
+                        ["Reverse Charge", "", "", "", ""], // Row 10
+                        ["Expenses", "", "", "", ""], // Row 11
+                        ["Amount Difference In Accounts", "", "", "", ""], // Row 12
+                        ["", "", "", "", ""], // Row 13
+                        ["Less:", "", "", "", ""], // Row 14
+                        ["Input invoices in accounts not in 2B", "", "", "", ""], // Row 15
+                        ["Input invoice Amended", "", "", "", ""], // Row 16
+                        ["", "", "", "", ""], // Row 17
+                        ["Input invoices as per calculation", "", "", "", ""], // Row 18 (FORMULA)
+                        ["Input invoices in 2B", "", "", "", ""], // Row 19
+                        ["Add: Expenses", "", "", "", ""], // Row 20
+                        ["Less: Credit notes in 2B", "", "", "", ""], // Row 21
+                        ["Less: RCM Expense", "", "", "", ""], // Row 22
+                        ["", "", "", "", ""], // Row 23
+                        ["Input invoices as per 2B", "", "", "", ""], // Row 24 (FORMULA)
+                        ["Difference", "", "", "", ""] // Row 25 (FORMULA)
+                    ];
+
+                    const range = sheet.getRange("A1:E25");
+                    range.values = tableData;
+
+                    // Injecting specific summation and logic formulas into the grid
+                    const formulaRange = sheet.getRange("B1:E25");
+                    let formulas = formulaRange.formulas;
+                    
+                    // Column B to E loops for formulas (Index 0 is Col B, Index 3 is Col E)
+                    for (let c = 0; c < 4; c++) {
+                        let colLetter = String.fromCharCode(66 + c); // B, C, D, E
+                        
+                        // Net input as per accounts
+                        formulas[5][c] = `=SUM(${colLetter}2:${colLetter}3)-${colLetter}4-${colLetter}5`;
+                        
+                        // Input invoices as per calculation
+                        formulas[17][c] = `=${colLetter}6+SUM(${colLetter}9:${colLetter}12)-SUM(${colLetter}15:${colLetter}16)`;
+                        
+                        // Input invoices as per 2B
+                        formulas[23][c] = `=${colLetter}19+${colLetter}20-${colLetter}21-${colLetter}22`;
+                        
+                        // Difference
+                        formulas[24][c] = `=${colLetter}18-${colLetter}24`;
+                    }
+                    formulaRange.formulas = formulas;
+
+                    // Formatting the template
+                    sheet.getRange("A1:E1").format.font.bold = true;
+                    sheet.getRange("A1:E1").format.borders.getItem('EdgeBottom').style = 'Continuous';
+                    
+                    sheet.getRange("A6:E6").format.font.bold = true; // Net Input
+                    sheet.getRange("A18:E18").format.font.bold = true; // As per calc
+                    sheet.getRange("A24:E25").format.font.bold = true; // As per 2b & Diff
+                    
+                    // Light gray backgrounds for formula rows
+                    sheet.getRange("A6:E6").format.fill.color = "#f3f2f1";
+                    sheet.getRange("A18:E18").format.fill.color = "#f3f2f1";
+                    sheet.getRange("A24:E25").format.fill.color = "#f3f2f1";
+
+                    // Apply Accounting format to all number columns
+                    sheet.getRange("B2:E25").numberFormat = "_(* #,##0.00_);_(* (#,##0.00);_(* \"-\"??_);_(@_)";
+
+                    sheet.getRange("A:E").format.autofitColumns();
+                    sheet.activate();
+                    await context.sync();
+                    
+                    showStatus("GST Reconciliation Template Deployed Successfully.");
+                });
+            } catch (error) { 
+                if (error.message.includes("ItemAlreadyExists")) {
+                    showStatus("Error: A sheet with that name already exists. Please rename and try again.", true);
+                } else {
+                    showStatus("Deployment Error: " + error.message, true); 
+                }
+            }
+        }
+
 
         /* --- PIVOT --- */
         let pivotRangeAddress = "";
@@ -283,12 +392,9 @@
             showStatus("Running reconciliation...");
             try {
                 await Excel.run(async (context) => {
-                    // Pull custom names from UI
                     const nameA = document.getElementById('name-a').value || "List A";
                     const nameB = document.getElementById('name-b').value || "List B";
-                    
-                    // Sanitize Output Sheet Name to prevent Excel crashes (max 31 chars, no special symbols)
-                    let rawOutName = document.getElementById('recon-sheet-name').value || "ReconReport";
+                    let rawOutName = document.getElementById('recon-sheet-name').value || "Match_Report";
                     let outName = rawOutName.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
                     
                     const sheetA = context.workbook.worksheets.getItem(reconRangeA.sheetName);
@@ -306,7 +412,6 @@
                     let cleanA = listA.map(v => v.trim().toLowerCase());
                     let cleanB = listB.map(v => v.trim().toLowerCase());
                     
-                    // Use custom names in report headers
                     let report = [[`Item from ${nameA}`, `Status / Found in ${nameB}`]];
 
                     function getLev(s1, s2) {
@@ -340,7 +445,6 @@
                         if (!cleanA.includes(cleanB[i])) report.push([`[${nameB}] ${listB[i]}`, `❌ Missing in ${nameA}`]);
                     }
 
-                    // Create the new sheet using the custom sanitized name
                     const tSheet = context.workbook.worksheets.add(outName);
                     const oRange = tSheet.getRangeByIndexes(1, 1, report.length, 2);
                     oRange.values = report;
