@@ -196,7 +196,7 @@
             el.innerText = msg;
             el.className = isError ? 'status-error' : 'status-success';
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 4000);
+            setTimeout(() => { el.style.display = 'none'; }, 5000); // Gives you 5 seconds to read errors
         }
 
         /* --- PIVOT --- */
@@ -219,7 +219,7 @@
                     });
                     showStatus("Headers loaded!");
                 });
-            } catch (error) { showStatus("Error: Select a table block with headers.", true); }
+            } catch (error) { showStatus("Error: Select a table block with headers. " + error.message, true); }
         }
 
         async function executeDynamicPivot() {
@@ -229,16 +229,22 @@
                     const rowField = document.getElementById('pivot-row-select').value;
                     const valField = document.getElementById('pivot-val-select').value;
                     const aggType = document.getElementById('pivot-agg-select').value;
-                    const activeSheet = context.workbook.getActiveWorksheet();
+                    
+                    // FIXED TYPO HERE: added .worksheets
+                    const activeSheet = context.workbook.worksheets.getActiveWorksheet();
                     const sourceRange = activeSheet.getRange(pivotRangeAddress.split("!")[1]);
                     const targetSheet = context.workbook.worksheets.add("Summary_" + Math.floor(Math.random()*1000));
+                    
                     const newPivot = targetSheet.pivotTables.add("DynPivot", sourceRange, targetSheet.getRange("B3"));
                     await context.sync();
+                    
                     newPivot.rowHierarchies.add(newPivot.hierarchies.getItem(rowField));
                     let dataHier = newPivot.dataHierarchies.add(newPivot.hierarchies.getItem(valField));
+                    
                     if (aggType === "Sum") dataHier.summarizeBy = Excel.AggregationFunction.sum;
                     if (aggType === "Count") dataHier.summarizeBy = Excel.AggregationFunction.count;
                     if (aggType === "Average") dataHier.summarizeBy = Excel.AggregationFunction.average;
+                    
                     targetSheet.activate();
                     targetSheet.getRange("B:C").format.autofitColumns();
                     await context.sync();
@@ -253,14 +259,17 @@
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
-                    const sheet = context.workbook.getActiveWorksheet();
+                    // FIXED TYPO HERE: added .worksheets
+                    const sheet = context.workbook.worksheets.getActiveWorksheet();
+                    
                     range.load("address"); sheet.load("name");
                     await context.sync();
+                    
                     let data = { sheetName: sheet.name, address: range.address.split("!")[1] };
                     if (listId === 'A') { reconRangeA = data; document.getElementById('range-a-display').value = `${sheet.name}!${data.address}`; }
                     if (listId === 'B') { reconRangeB = data; document.getElementById('range-b-display').value = `${sheet.name}!${data.address}`; }
                 });
-            } catch (error) { showStatus("Select cells first, not a chart or shape.", true); }
+            } catch (error) { showStatus("Error saving range: " + error.message, true); }
         }
 
         async function executeReconciliation() {
@@ -271,9 +280,11 @@
                     const sheetA = context.workbook.worksheets.getItem(reconRangeA.sheetName);
                     const rangeA = sheetA.getRange(reconRangeA.address);
                     rangeA.load("values");
+                    
                     const sheetB = context.workbook.worksheets.getItem(reconRangeB.sheetName);
                     const rangeB = sheetB.getRange(reconRangeB.address);
                     rangeB.load("values");
+                    
                     await context.sync();
 
                     let listA = rangeA.values.map(r => String(r[0] || "")).filter(v => v.trim() !== "");
@@ -322,7 +333,7 @@
                     await context.sync();
                     showStatus("Reconciliation complete.");
                 });
-            } catch (error) { showStatus("Ensure both sheets still exist.", true); }
+            } catch (error) { showStatus("Recon Engine Error: " + error.message, true); }
         }
 
         /* --- CLEANSE & FONT --- */
@@ -344,7 +355,14 @@
                                 if (doTrim) val = val.trim().replace(/\s+/g, ' ');
                                 if (casing === 'upper') val = val.toUpperCase();
                                 else if (casing === 'lower') val = val.toLowerCase();
-                                else if (casing === 'proper') val = val.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+                                else if (casing === 'proper') {
+                                    // Robust proper case logic
+                                    let words = val.toLowerCase().split(" ");
+                                    for (let i = 0; i < words.length; i++) {
+                                        if (words[i].length > 0) words[i] = words[i].charAt(0).toUpperCase() + words[i].substring(1);
+                                    }
+                                    val = words.join(" ");
+                                }
                                 values[r][c] = val;
                             }
                         }
@@ -355,21 +373,20 @@
                     await context.sync();
                     showStatus("Data formatted.");
                 });
-            } catch (error) { showStatus("Error: " + error.message, true); }
+            } catch (error) { showStatus("Cleansing Error: " + error.message, true); }
         }
 
         async function applySheetFont() {
             try {
                 await Excel.run(async (context) => {
                     const sheet = context.workbook.worksheets.getActiveWorksheet();
-                    // Using getUsedRange prevents memory crashing on 17 billion empty cells
                     const range = sheet.getUsedRange(); 
                     const fontName = document.getElementById('sheet-font').value;
                     range.format.font.name = fontName;
                     await context.sync();
-                    showStatus(`Font changed to ${fontName}.`);
+                    showStatus(`Entire active sheet changed to ${fontName}.`);
                 });
-            } catch (error) { showStatus("Error applying font.", true); }
+            } catch (error) { showStatus("Error applying font: " + error.message, true); }
         }
 
         /* --- FORMULA FINDER --- */
@@ -415,7 +432,7 @@
                     await context.sync();
                     showStatus("Formula inserted. Double click cell to edit ranges.");
                 });
-            } catch (error) { showStatus("Error inserting formula.", true); }
+            } catch (error) { showStatus("Error inserting formula: " + error.message, true); }
         }
     </script>
 </body>
