@@ -4,68 +4,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Mastery Suite 2026</title>
+    <!-- Office.js Client Library -->
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap');
+
         :root {
-            --bg-base: #fafafa; --surface: #ffffff; --primary: #0f6cbd; --primary-hover: #0c5393;
-            --text-main: #242424; --text-muted: #616161; --border-subtle: #edebe9;
-            --radius-md: 8px; --radius-lg: 12px;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-            --transition: all 0.2s ease;
+            --bg-base: #080c14;
+            --surface: rgba(22, 28, 45, 0.45);
+            --surface-hover: rgba(30, 41, 59, 0.6);
+            --primary: #107c41;
+            --primary-hover: #128c4a;
+            --secondary: #1f8eed;
+            --secondary-hover: #2f9eff;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(31, 142, 237, 0.5);
+            
+            --text-main: #f3f4f6;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+            
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-base); color: var(--text-main); font-size: 13px; height: 100vh; display: flex; flex-direction: column; }
 
-        .header { background: var(--surface); padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 12px; }
-        .header-icon { background: linear-gradient(135deg, #107c41, #185abd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 24px; font-weight: bold; }
-        .header-text h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
-        .header-text p { font-size: 11px; color: var(--text-muted); }
-        .version-badge { background: #e1dfdd; color: #323130; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+        }
 
-        .nav-container { padding: 12px 16px; background: var(--surface); overflow-x: auto; }
-        .tabs { display: flex; background: var(--bg-base); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); min-width: max-content; }
-        .tab-btn { flex: 1; padding: 8px 12px; background: transparent; border: none; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); text-align: center; }
-        .tab-btn:hover { color: var(--text-main); }
-        .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; }
+        /* Custom Scrollbar styling */
+        *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
-        .workspace { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-        .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
-        .tab-content.active { display: block; }
+        body {
+            background: radial-gradient(circle at 50% 0%, #111b2d 0%, #080c14 100%);
+            color: var(--text-main);
+            font-size: 13px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header Style */
+        .header {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
         
-        .card { background: var(--surface); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-subtle); margin-bottom: 16px; }
-        .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;}
-        .card p.desc { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+        .header-icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow-sm);
+        }
 
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        select, input[type="text"] { width: 100%; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-base); font-size: 13px; color: var(--text-main); outline: none; transition: var(--transition); }
-        select:focus, input[type="text"]:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 2px rgba(15, 108, 189, 0.1); }
+        .header-icon {
+            color: #10b981;
+            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+
+        .header-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .version-badge {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            letter-spacing: 0.5px;
+        }
+
+        /* Tab Navigation */
+        .nav-container {
+            padding: 12px 16px 4px 16px;
+            background: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            min-width: max-content;
+            gap: 4px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Hide scrollbar for standard compliant browsers */
+        }
         
-        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; }
-        .checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; }
+        .tabs::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome/Safari */
+        }
 
-        .btn { width: 100%; padding: 10px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
-        .btn-primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-md); }
-        .btn-secondary { background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-subtle); }
-        .btn-secondary:hover { background: #f0f0f0; }
+        .tab-btn {
+            flex: 1;
+            padding: 9px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
 
-        .flex-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 124, 65, 0.25);
+            font-weight: 600;
+        }
         
-        .formula-result { background: #f3f2f1; padding: 12px; border-radius: var(--radius-md); border-left: 4px solid var(--primary); font-family: monospace; font-size: 12px; margin-bottom: 12px; display: none; word-wrap: break-word; }
-        .formula-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: none; }
+        .tab-btn i {
+            width: 14px;
+            height: 14px;
+        }
 
-        #status-area { position: fixed; bottom: 16px; left: 16px; right: 16px; display: none; padding: 12px; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; text-align: center; z-index: 100; box-shadow: var(--shadow-md); }
-        .status-success { background: #dff6dd; color: #107c41; border: 1px solid #c7e0c4; }
-        .status-error { background: #fde7e9; color: #a80000; border: 1px solid #e1c0c3; }
+        /* Workspace and Layout */
+        .workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: tabFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Card Styles */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            border-color: rgba(31, 142, 237, 0.25);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .card h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        .card h2 i {
+            color: var(--secondary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .card p.desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        /* Form Group and Controls */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.6);
+            font-size: 12.5px;
+            color: var(--text-main);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--secondary);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 3px rgba(31, 142, 237, 0.15);
+        }
+        
+        select option {
+            background-color: #0b0f19;
+            color: var(--text-main);
+        }
+        
+        /* Checkboxes */
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .checkbox-item input {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .checkbox-item span {
+            font-size: 12px;
+            color: var(--text-main);
+            user-select: none;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 11px 16px;
+            border-radius: var(--radius-md);
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(31, 142, 237, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(31, 142, 237, 0.4);
+            background: linear-gradient(135deg, var(--primary-hover) 0%, var(--secondary-hover) 100%);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(31, 142, 237, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+        
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Layout Grid and Utilities */
+        .flex-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .range-display {
+            flex: 1;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 11px;
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.04) !important;
+            border: 1px solid rgba(16, 185, 129, 0.2) !important;
+            text-align: center;
+        }
+
+        /* Formula Results Styling */
+        .formula-result {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--secondary);
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 11.5px;
+            color: #38bdf8;
+            margin-bottom: 12px;
+            display: none;
+            word-wrap: break-word;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        
+        .formula-desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        /* Floating Status Alerts */
+        #status-area {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: none;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(16px);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3)); opacity: 0.85; }
+            50% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6)); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-icon">✦</div>
+        <div class="header-icon-container">
+            <i data-lucide="sparkles" class="header-icon"></i>
+        </div>
         <div class="header-text">
             <h1>Mastery Suite <span class="version-badge">v3.1.2</span></h1>
             <p>Copilot-era Data Operations</p>
@@ -74,63 +471,110 @@
 
     <div class="nav-container">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('gst-tab')">GST Reco</button>
-            <button class="tab-btn" onclick="switchTab('pivot-tab')">Pivot</button>
-            <button class="tab-btn" onclick="switchTab('recon-tab')">Match</button>
-            <button class="tab-btn" onclick="switchTab('clean-tab')">Cleanse</button>
-            <button class="tab-btn" onclick="switchTab('formula-tab')">Funcs</button>
+            <button class="tab-btn active" onclick="switchTab('gst-tab', this)">
+                <i data-lucide="file-spreadsheet"></i>
+                <span>GST Reco</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('pivot-tab', this)">
+                <i data-lucide="table-properties"></i>
+                <span>Pivot</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('recon-tab', this)">
+                <i data-lucide="git-compare"></i>
+                <span>Match</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('clean-tab', this)">
+                <i data-lucide="sparkles"></i>
+                <span>Cleanse</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('formula-tab', this)">
+                <i data-lucide="function-square"></i>
+                <span>Funcs</span>
+            </button>
         </div>
     </div>
 
     <div class="workspace">
 
+        <!-- GST Reconciliation Tab -->
         <div id="gst-tab" class="tab-content active">
             <div class="card">
-                <h2>📑 GST 2B vs Books Summary</h2>
+                <h2><i data-lucide="file-check-2"></i> GST 2B vs Books Summary</h2>
                 <p class="desc">Deploy a standard reconciliation template. The engine will automatically scan your workbook for "2B" and "Purchase/Accounts" sheets to link the grand totals.</p>
                 <div class="form-group">
                     <label>Output Sheet Name</label>
                     <input type="text" id="gst-sheet-name" value="GST_Reconciliation" placeholder="e.g., May_GST_Reco">
                 </div>
-                <button class="btn btn-primary" onclick="deployGSTSummary()">Deploy & Auto-Link</button>
+                <button class="btn btn-primary" onclick="deployGSTSummary()">
+                    <i data-lucide="arrow-up-right-square"></i>
+                    <span>Deploy & Auto-Link</span>
+                </button>
             </div>
         </div>
         
+        <!-- Dynamic Pivot Tab -->
         <div id="pivot-tab" class="tab-content">
             <div class="card">
-                <h2>✨ Dynamic Pivot</h2>
-                <p class="desc">Highlight your data table (with headers) and load to build.</p>
-                <button class="btn btn-secondary" onclick="loadPivotHeaders()" style="margin-bottom: 16px;">📥 Load Data Headers</button>
-                <div class="form-group"><label>Group By (Rows)</label><select id="pivot-row-select"><option>Load headers first...</option></select></div>
-                <div class="form-group"><label>Value to Summarize</label><select id="pivot-val-select"><option>Load headers first...</option></select></div>
+                <h2><i data-lucide="layout-grid"></i> Dynamic Pivot Summary</h2>
+                <p class="desc">Highlight your data table (with headers) and load to build a structured visual summary.</p>
+                <button class="btn btn-secondary" onclick="loadPivotHeaders()" style="margin-bottom: 16px;">
+                    <i data-lucide="download-cloud"></i>
+                    <span>Load Data Headers</span>
+                </button>
+                <div class="form-group">
+                    <label>Group By (Rows)</label>
+                    <select id="pivot-row-select">
+                        <option>Load headers first...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Value to Summarize</label>
+                    <select id="pivot-val-select">
+                        <option>Load headers first...</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Aggregation Method</label>
-                    <select id="pivot-agg-select"><option value="Sum">Sum</option><option value="Count">Count</option><option value="Average">Average</option></select>
+                    <select id="pivot-agg-select">
+                        <option value="Sum">Sum</option>
+                        <option value="Count">Count</option>
+                        <option value="Average">Average</option>
+                    </select>
                 </div>
-                <button class="btn btn-primary" onclick="executeDynamicPivot()">Generate Summary</button>
+                <button class="btn btn-primary" onclick="executeDynamicPivot()">
+                    <i data-lucide="play"></i>
+                    <span>Generate Summary</span>
+                </button>
             </div>
         </div>
 
+        <!-- List Matcher Tab -->
         <div id="recon-tab" class="tab-content">
             <div class="card">
-                <h2>⚖️ List Matcher</h2>
-                <p class="desc">Customize your list names, select your ranges, and compare.</p>
+                <h2><i data-lucide="scale"></i> Intelligent List Matcher</h2>
+                <p class="desc">Customize list labels, define custom cell ranges from active sheets, and map matching outputs.</p>
                 
                 <div class="form-group">
                     <label>List A Name</label>
                     <input type="text" id="name-a" value="Internal Data" placeholder="e.g., Tally Export">
-                    <div class="flex-row" style="margin-top: 8px;">
-                        <button class="btn btn-secondary" onclick="setReconRange('A')">Set Range A</button>
-                        <input type="text" id="range-a-display" placeholder="No range selected" disabled>
+                    <div class="flex-row">
+                        <button class="btn btn-secondary" onclick="setReconRange('A')">
+                            <i data-lucide="expand"></i>
+                            <span>Set Range A</span>
+                        </button>
+                        <input type="text" id="range-a-display" placeholder="No range selected" disabled class="range-display">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>List B Name</label>
                     <input type="text" id="name-b" value="Vendor Data" placeholder="e.g., Portal">
-                    <div class="flex-row" style="margin-top: 8px;">
-                        <button class="btn btn-secondary" onclick="setReconRange('B')">Set Range B</button>
-                        <input type="text" id="range-b-display" placeholder="No range selected" disabled>
+                    <div class="flex-row">
+                        <button class="btn btn-secondary" onclick="setReconRange('B')">
+                            <i data-lucide="expand"></i>
+                            <span>Set Range B</span>
+                        </button>
+                        <input type="text" id="range-b-display" placeholder="No range selected" disabled class="range-display">
                     </div>
                 </div>
 
@@ -139,13 +583,17 @@
                     <input type="text" id="recon-sheet-name" value="Match_Report" placeholder="Name the new sheet">
                 </div>
 
-                <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">Run Match Report</button>
+                <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">
+                    <i data-lucide="rocket"></i>
+                    <span>Run Match Report</span>
+                </button>
             </div>
         </div>
 
+        <!-- Cleanse Tab -->
         <div id="clean-tab" class="tab-content">
             <div class="card">
-                <h2>🧹 Format Selection</h2>
+                <h2><i data-lucide="brush"></i> Format Selection</h2>
                 <div class="form-group">
                     <label>Text Casing</label>
                     <select id="clean-case">
@@ -155,14 +603,26 @@
                         <option value="lower">lower case</option>
                     </select>
                 </div>
-                <label class="checkbox-item"><input type="checkbox" id="clean-trim" checked><span>Trim excess spaces</span></label>
-                <label class="checkbox-item"><input type="checkbox" id="clean-accounting"><span>Format as Accounting</span></label>
-                <label class="checkbox-item"><input type="checkbox" id="clean-autofit" checked><span>Auto-fit column widths</span></label>
-                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">Clean Selection</button>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="clean-trim" checked>
+                    <span>Trim excess spaces</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="clean-accounting">
+                    <span>Format as Accounting</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="clean-autofit" checked>
+                    <span>Auto-fit column heights & widths</span>
+                </label>
+                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
+                    <i data-lucide="wand-2"></i>
+                    <span>Clean Selection</span>
+                </button>
             </div>
 
             <div class="card">
-                <h2>A Fonts (Whole Sheet)</h2>
+                <h2><i data-lucide="type"></i> Typography (Whole Sheet)</h2>
                 <div class="form-group">
                     <select id="sheet-font">
                         <option value="Calibri">Calibri (Modern Default)</option>
@@ -170,47 +630,83 @@
                         <option value="Times New Roman">Times New Roman (Formal)</option>
                     </select>
                 </div>
-                <button class="btn btn-secondary" onclick="applySheetFont()">Apply Font to Sheet</button>
+                <button class="btn btn-secondary" onclick="applySheetFont()">
+                    <i data-lucide="type"></i>
+                    <span>Apply Font to Sheet</span>
+                </button>
             </div>
         </div>
 
+        <!-- Formula Finder Tab -->
         <div id="formula-tab" class="tab-content">
             <div class="card">
-                <h2>💡 Formula Finder</h2>
+                <h2><i data-lucide="help-circle"></i> Formula Finder</h2>
                 <p class="desc">Describe what you want to do (e.g. "search for a value", "add conditionally", "combine text").</p>
                 <div class="form-group">
                     <input type="text" id="formula-search" placeholder="E.g. find a value, count blanks...">
                 </div>
-                <button class="btn btn-secondary" onclick="searchFormula()" style="margin-bottom: 16px;">🔍 Find Formula</button>
+                <button class="btn btn-secondary" onclick="searchFormula()" style="margin-bottom: 16px;">
+                    <i data-lucide="search"></i>
+                    <span>Find Formula</span>
+                </button>
                 
                 <div id="f-desc" class="formula-desc"></div>
                 <div id="f-result" class="formula-result"></div>
                 
-                <button id="f-insert-btn" class="btn btn-primary" onclick="insertFormula()" style="display:none;">📥 Insert into Active Cell</button>
+                <button id="f-insert-btn" class="btn btn-primary" onclick="insertFormula()" style="display:none;">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Insert into Active Cell</span>
+                </button>
             </div>
         </div>
 
     </div>
 
+    <!-- Toast Notifications -->
     <div id="status-area"></div>
 
     <script>
-        Office.onReady((info) => { if (info.host === Office.HostType.Excel) console.log("Engine Online v3.1.2."); });
+        // Initialize Lucide Icons on load
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        Office.onReady((info) => { 
+            if (info.host === Office.HostType.Excel) {
+                console.log("Engine Online v3.1.2."); 
+            }
+        });
+
+        // Updated switchTab to support passing active element cleanly
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            
+            if (el) {
+                el.classList.add('active');
+            } else if (window.event) {
+                window.event.currentTarget.classList.add('active');
+            }
+            
             document.getElementById('status-area').style.display = 'none';
         }
 
+        // Animated toast notification display
         function showStatus(msg, isError = false) {
             const el = document.getElementById('status-area');
             el.innerText = msg;
             el.className = isError ? 'status-error' : 'status-success';
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 6000); 
+            
+            // Auto hide logic
+            if (window.statusTimeout) {
+                clearTimeout(window.statusTimeout);
+            }
+            window.statusTimeout = setTimeout(() => { 
+                el.style.display = 'none'; 
+            }, 6000); 
         }
 
         /* --- GST SUMMARY DEPLOYER (v3.1.2 AUTO-LINKING ENGINE) --- */
