@@ -194,6 +194,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            user-select: none; /* Helps with drag-to-swipe visual cleanliness */
         }
 
         .tab-content {
@@ -256,6 +257,7 @@
         /* Form Group and Controls */
         .form-group {
             margin-bottom: 14px;
+            user-select: text; /* Retain text selection inside forms */
         }
 
         label {
@@ -446,6 +448,20 @@
             border-color: rgba(239, 68, 68, 0.3);
         }
 
+        /* Swipe Instruction Badge */
+        .swipe-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: -4px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
         @keyframes slideUp {
             from { transform: translateY(20px) scale(0.95); opacity: 0; }
             to { transform: translateY(0) scale(1); opacity: 1; }
@@ -471,23 +487,27 @@
 
     <div class="nav-container">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('gst-tab', this)">
+            <button id="btn-gst-tab" class="tab-btn active" onclick="switchTab('gst-tab', this)">
                 <i data-lucide="file-spreadsheet"></i>
                 <span>GST Reco</span>
             </button>
-            <button class="tab-btn" onclick="switchTab('pivot-tab', this)">
+            <button id="btn-pivot-tab" class="tab-btn" onclick="switchTab('pivot-tab', this)">
                 <i data-lucide="table-properties"></i>
                 <span>Pivot</span>
             </button>
-            <button class="tab-btn" onclick="switchTab('recon-tab', this)">
+            <button id="btn-recon-tab" class="tab-btn" onclick="switchTab('recon-tab', this)">
                 <i data-lucide="git-compare"></i>
                 <span>Match</span>
             </button>
-            <button class="tab-btn" onclick="switchTab('clean-tab', this)">
+            <button id="btn-clean-tab" class="tab-btn" onclick="switchTab('clean-tab', this)">
                 <i data-lucide="sparkles"></i>
                 <span>Cleanse</span>
             </button>
-            <button class="tab-btn" onclick="switchTab('formula-tab', this)">
+            <button id="btn-mask-tab" class="tab-btn" onclick="switchTab('mask-tab', this)">
+                <i data-lucide="shield"></i>
+                <span>Mask</span>
+            </button>
+            <button id="btn-formula-tab" class="tab-btn" onclick="switchTab('formula-tab', this)">
                 <i data-lucide="function-square"></i>
                 <span>Funcs</span>
             </button>
@@ -495,6 +515,10 @@
     </div>
 
     <div class="workspace">
+        <div class="swipe-hint">
+            <i data-lucide="arrow-left-right" style="width: 10px; height: 10px;"></i>
+            <span>Swipe workspace to navigate tabs</span>
+        </div>
 
         <!-- GST Reconciliation Tab -->
         <div id="gst-tab" class="tab-content active">
@@ -637,6 +661,27 @@
             </div>
         </div>
 
+        <!-- Data Masking (Anonymizer) Tab -->
+        <div id="mask-tab" class="tab-content">
+            <div class="card">
+                <h2><i data-lucide="shield-alert"></i> Compliance Data Masker</h2>
+                <p class="desc">Select a cell range containing sensitive business parameters. Choose a masking profile to overwrite and anonymize values before sharing worksheets.</p>
+                <div class="form-group">
+                    <label>Masking Profile</label>
+                    <select id="mask-type">
+                        <option value="email">Email Addresses (e.g., a***b@domain.com)</option>
+                        <option value="phone">Phone Numbers (e.g., ******9876)</option>
+                        <option value="numeric">All Numbers (e.g., 5432 -> ****)</option>
+                        <option value="all">Full Masking (e.g., confidential -> *****)</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="executeDataMasking()">
+                    <i data-lucide="shield"></i>
+                    <span>Apply Masking</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Formula Finder Tab -->
         <div id="formula-tab" class="tab-content">
             <div class="card">
@@ -666,9 +711,13 @@
     <div id="status-area"></div>
 
     <script>
+        // Array ordering of tabs for sliding swipable control
+        const tabsArray = ['gst-tab', 'pivot-tab', 'recon-tab', 'clean-tab', 'mask-tab', 'formula-tab'];
+
         // Initialize Lucide Icons on load
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            initSwipableWorkspace();
         });
 
         Office.onReady((info) => { 
@@ -677,30 +726,87 @@
             }
         });
 
-        // Updated switchTab to support passing active element cleanly
+        // Switch tab visually and scroll header buttons dynamically
         function switchTab(tabId, el) {
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             
             document.getElementById(tabId).classList.add('active');
             
+            // Map element if not directly provided (e.g. during swipe)
+            if (!el) {
+                el = document.getElementById('btn-' + tabId);
+            }
+            
             if (el) {
                 el.classList.add('active');
-            } else if (window.event) {
-                window.event.currentTarget.classList.add('active');
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
             
             document.getElementById('status-area').style.display = 'none';
         }
 
-        // Animated toast notification display
+        // Setup pointer dragging gesture events for swipe navigation
+        function initSwipableWorkspace() {
+            const workspace = document.querySelector('.workspace');
+            let pointerStartX = 0;
+            let pointerStartY = 0;
+            let isPointerDown = false;
+
+            workspace.addEventListener('pointerdown', e => {
+                // Ignore dragging inside input areas, dropdown selects, and action buttons to allow text highlight/click
+                if (e.target.closest('input') || e.target.closest('select') || e.target.closest('button')) {
+                    return;
+                }
+                pointerStartX = e.clientX;
+                pointerStartY = e.clientY;
+                isPointerDown = true;
+            });
+
+            workspace.addEventListener('pointerup', e => {
+                if (!isPointerDown) return;
+                isPointerDown = false;
+                
+                const pointerEndX = e.clientX;
+                const pointerEndY = e.clientY;
+                
+                const minSwipeDistance = 60; // minimum X distance to switch tabs
+                const maxVerticalOffset = 40; // ignore horizontal swipe if vertical shift is too large
+                
+                const diffX = pointerEndX - pointerStartX;
+                const diffY = pointerEndY - pointerStartY;
+                
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffY) < maxVerticalOffset) {
+                    if (Math.abs(diffX) > minSwipeDistance) {
+                        const activeTabContent = document.querySelector('.tab-content.active');
+                        if (activeTabContent) {
+                            const currentIndex = tabsArray.indexOf(activeTabContent.id);
+                            if (diffX < 0) {
+                                // Swiped Left -> Switch to Next Tab
+                                if (currentIndex < tabsArray.length - 1) {
+                                    const nextTabId = tabsArray[currentIndex + 1];
+                                    switchTab(nextTabId);
+                                }
+                            } else {
+                                // Swiped Right -> Switch to Previous Tab
+                                if (currentIndex > 0) {
+                                    const prevTabId = tabsArray[currentIndex - 1];
+                                    switchTab(prevTabId);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Animated status notification toaster
         function showStatus(msg, isError = false) {
             const el = document.getElementById('status-area');
             el.innerText = msg;
             el.className = isError ? 'status-error' : 'status-success';
             el.style.display = 'block';
             
-            // Auto hide logic
             if (window.statusTimeout) {
                 clearTimeout(window.statusTimeout);
             }
@@ -1041,6 +1147,63 @@
                     showStatus(`Entire active sheet changed to ${fontName}.`);
                 });
             } catch (error) { showStatus("Font Error: " + error.message, true); }
+        }
+
+        /* --- DATA MASKING (ANONYMIZER) --- */
+        async function executeDataMasking() {
+            showStatus("Masking sensitive values...");
+            try {
+                await Excel.run(async (context) => {
+                    const range = context.workbook.getSelectedRange();
+                    range.load("values");
+                    await context.sync();
+                    
+                    let values = range.values;
+                    if (!values || values.length === 0) {
+                        showStatus("Error: No data found in selection.", true);
+                        return;
+                    }
+                    
+                    const maskType = document.getElementById('mask-type').value;
+                    
+                    for (let r = 0; r < values.length; r++) {
+                        for (let c = 0; c < values[0].length; c++) {
+                            let val = values[r][c];
+                            if (val !== null && val !== undefined && val !== "") {
+                                let strVal = String(val);
+                                if (maskType === 'email') {
+                                    let parts = strVal.split('@');
+                                    if (parts.length === 2) {
+                                        let name = parts[0];
+                                        let domain = parts[1];
+                                        if (name.length > 2) {
+                                            values[r][c] = name[0] + '*'.repeat(name.length - 2) + name[name.length - 1] + '@' + domain;
+                                        } else {
+                                            values[r][c] = '*'.repeat(name.length) + '@' + domain;
+                                        }
+                                    }
+                                } else if (maskType === 'phone') {
+                                    let digits = strVal.replace(/\D/g, '');
+                                    if (digits.length > 4) {
+                                        values[r][c] = '*'.repeat(digits.length - 4) + digits.slice(-4);
+                                    } else {
+                                        values[r][c] = '*'.repeat(strVal.length);
+                                    }
+                                } else if (maskType === 'numeric') {
+                                    values[r][c] = strVal.replace(/\d/g, '*');
+                                } else if (maskType === 'all') {
+                                    values[r][c] = '*'.repeat(strVal.length);
+                                }
+                            }
+                        }
+                    }
+                    range.values = values;
+                    await context.sync();
+                    showStatus("Selected range masked successfully.");
+                });
+            } catch (error) {
+                showStatus("Masking Error: " + error.message, true);
+            }
         }
 
         /* --- FORMULA FINDER --- */
