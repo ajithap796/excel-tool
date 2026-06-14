@@ -487,7 +487,7 @@
             <i data-lucide="sparkles" class="header-icon"></i>
         </div>
         <div class="header-text">
-            <h1>Mastery Suite <span class="version-badge">v3.3.0</span></h1>
+            <h1>Mastery Suite <span class="version-badge">v3.3.1</span></h1>
             <p>Copilot-era Data Operations</p>
         </div>
     </div>
@@ -731,6 +731,8 @@
         // Array ordering of tabs for sliding swipable control
         const tabsArray = ['gst-tab', 'pivot-tab', 'recon-tab', 'clean-tab', 'mask-tab', 'formula-tab'];
 
+        let isOfficeInitialized = false;
+
         // Initialize Lucide Icons on load
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -740,9 +742,19 @@
 
         Office.onReady((info) => { 
             if (info.host === Office.HostType.Excel) {
-                console.log("Engine Online v3.3.0."); 
+                isOfficeInitialized = true;
+                console.log("Engine Online v3.3.1."); 
             }
         });
+
+        // Helper to check Office.js initialization
+        function checkOffice() {
+            if (!isOfficeInitialized) {
+                showStatus("Office.js is not loaded yet. If running in a web browser, please launch this inside Excel.", true);
+                return false;
+            }
+            return true;
+        }
 
         // Switch tab visually and scroll header buttons dynamically
         function switchTab(tabId, el) {
@@ -867,6 +879,7 @@
 
         /* --- GST SUMMARY DEPLOYER (v3.1.2 AUTO-LINKING ENGINE) --- */
         async function deployGSTSummary() {
+            if (!checkOffice()) return;
             showStatus("Scanning workbook & building Summary...");
             try {
                 await Excel.run(async (context) => {
@@ -996,6 +1009,7 @@
         /* --- PIVOT --- */
         let pivotRangeAddress = "";
         async function loadPivotHeaders() {
+            if (!checkOffice()) return;
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
@@ -1023,6 +1037,7 @@
         }
 
         async function executeDynamicPivot() {
+            if (!checkOffice()) return;
             if (!pivotRangeAddress) { showStatus("Load headers first.", true); return; }
             try {
                 await Excel.run(async (context) => {
@@ -1056,6 +1071,7 @@
         /* --- RECONCILE --- */
         let reconRangeA = null; let reconRangeB = null;
         async function setReconRange(listId) {
+            if (!checkOffice()) return;
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
@@ -1072,6 +1088,7 @@
         }
 
         async function executeReconciliation() {
+            if (!checkOffice()) return;
             if (!reconRangeA || !reconRangeB) { showStatus("Set both Range A and Range B.", true); return; }
             showStatus("Running reconciliation...");
             try {
@@ -1149,6 +1166,7 @@
 
         /* --- CLEANSE & FONT --- */
         async function executeDataCleaning() {
+            if (!checkOffice()) return;
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
@@ -1187,6 +1205,7 @@
         }
 
         async function applySheetFont() {
+            if (!checkOffice()) return;
             try {
                 await Excel.run(async (context) => {
                     const sheet = context.workbook.worksheets.getActiveWorksheet();
@@ -1201,6 +1220,7 @@
 
         /* --- REPORT FORMATTING (VBA PORT) --- */
         async function executeReportFormatting() {
+            if (!checkOffice()) return;
             showStatus("Formatting report layout...");
             try {
                 await Excel.run(async (context) => {
@@ -1249,6 +1269,7 @@
 
         /* --- DATA MASKING (ANONYMIZER) --- */
         async function executeDataMasking() {
+            if (!checkOffice()) return;
             showStatus("Masking sensitive values...");
             try {
                 await Excel.run(async (context) => {
@@ -1340,6 +1361,7 @@
         }
 
         async function insertFormula() {
+            if (!checkOffice()) return;
             try {
                 await Excel.run(async (context) => {
                     const range = context.workbook.getSelectedRange();
