@@ -652,6 +652,16 @@
                 </button>
             </div>
 
+            <!-- Integrated Report Prep (VBA Port) Card -->
+            <div class="card">
+                <h2><i data-lucide="file-text"></i> Prep Report (VBA Port)</h2>
+                <p class="desc">Deletes top 4 rows, aligns headers, unmerges, fills down columns (A-B, G-I, N-U), removes temp header, applies AutoFilter, and resets text wrapping.</p>
+                <button class="btn btn-primary" onclick="executeReportFormatting()">
+                    <i data-lucide="play-circle"></i>
+                    <span>Run Report Prep</span>
+                </button>
+            </div>
+
             <div class="card">
                 <h2><i data-lucide="type"></i> Typography (Whole Sheet)</h2>
                 <div class="form-group">
@@ -1187,6 +1197,54 @@
                     showStatus(`Entire active sheet changed to ${fontName}.`);
                 });
             } catch (error) { showStatus("Font Error: " + error.message, true); }
+        }
+
+        /* --- REPORT FORMATTING (VBA PORT) --- */
+        async function executeReportFormatting() {
+            showStatus("Formatting report layout...");
+            try {
+                await Excel.run(async (context) => {
+                    const sheet = context.workbook.worksheets.getActiveWorksheet();
+                    
+                    // 1. Delete rows 1:4 (shifting remaining rows up)
+                    sheet.getRange("1:4").delete(Excel.DeleteShiftDirection.up);
+                    
+                    // 2. Format row 1 and row 2 (which are now headers)
+                    const rows1_2 = sheet.getRange("1:2");
+                    rows1_2.format.verticalAlignment = Excel.VerticalAlignment.center;
+                    rows1_2.format.wrapText = true;
+                    rows1_2.unmerge();
+                    
+                    // 3. Copy headers/formulas from row 1 down to row 2 for specified columns
+                    sheet.getRange("A2:B2").copyFrom(sheet.getRange("A1:B1"));
+                    sheet.getRange("G2:I2").copyFrom(sheet.getRange("G1:I1"));
+                    sheet.getRange("N2:U2").copyFrom(sheet.getRange("N1:U1"));
+                    
+                    // Sync to guarantee copying is done before deletion
+                    await context.sync();
+                    
+                    // 4. Delete row 1 (shifting filled row 2 up to row 1)
+                    sheet.getRange("1:1").delete(Excel.DeleteShiftDirection.up);
+                    await context.sync();
+                    
+                    // 5. Select the contiguous data block from A1
+                    const dataRange = sheet.getRange("A1").getSurroundingRegion();
+                    
+                    // 6. Apply AutoFilter
+                    sheet.autoFilter.apply(dataRange);
+                    
+                    // 7. Un-wrap text on the entire block
+                    dataRange.format.wrapText = false;
+                    
+                    // 8. Focus/select C12
+                    sheet.getRange("C12").select();
+                    
+                    await context.sync();
+                    showStatus("Report prepared and AutoFiltered successfully!");
+                });
+            } catch (error) {
+                showStatus("Formatting Error: " + error.message, true);
+            }
         }
 
         /* --- DATA MASKING (ANONYMIZER) --- */
