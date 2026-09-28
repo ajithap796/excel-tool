@@ -494,7 +494,11 @@
 
     <div class="nav-container">
         <div class="tabs">
-            <button id="btn-gst-tab" class="tab-btn active" onclick="switchTab('gst-tab', this)">
+            <button id="btn-clean-tab" class="tab-btn active" onclick="switchTab('clean-tab', this)">
+                <i data-lucide="sparkles"></i>
+                <span>Cleanse</span>
+            </button>
+            <button id="btn-gst-tab" class="tab-btn" onclick="switchTab('gst-tab', this)">
                 <i data-lucide="file-spreadsheet"></i>
                 <span>GST Reco</span>
             </button>
@@ -505,10 +509,6 @@
             <button id="btn-recon-tab" class="tab-btn" onclick="switchTab('recon-tab', this)">
                 <i data-lucide="git-compare"></i>
                 <span>Match</span>
-            </button>
-            <button id="btn-clean-tab" class="tab-btn" onclick="switchTab('clean-tab', this)">
-                <i data-lucide="sparkles"></i>
-                <span>Cleanse</span>
             </button>
             <button id="btn-mask-tab" class="tab-btn" onclick="switchTab('mask-tab', this)">
                 <i data-lucide="shield"></i>
@@ -527,8 +527,65 @@
             <span>Swipe workspace or drag tab bar to navigate</span>
         </div>
 
+        <!-- Cleanse Tab -->
+        <div id="clean-tab" class="tab-content active">
+            <div class="card">
+                <h2><i data-lucide="brush"></i> Format Selection</h2>
+                <div class="form-group">
+                    <label>Text Casing</label>
+                    <select id="clean-case">
+                        <option value="none">Don't Change Casing</option>
+                        <option value="proper">Proper Case (Capitalize Words)</option>
+                        <option value="upper">UPPER CASE</option>
+                        <option value="lower">lower case</option>
+                    </select>
+                </div>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="clean-trim" checked>
+                    <span>Trim excess spaces</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="clean-accounting">
+                    <span>Format as Accounting</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="clean-autofit" checked>
+                    <span>Auto-fit column heights & widths</span>
+                </label>
+                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
+                    <i data-lucide="wand-2"></i>
+                    <span>Clean Selection</span>
+                </button>
+            </div>
+
+            <!-- Integrated Report Prep (VBA Port) Card -->
+            <div class="card">
+                <h2><i data-lucide="file-text"></i> Prep Report (VBA Port)</h2>
+                <p class="desc">Deletes top 4 rows, aligns headers, unmerges, fills down columns (A-B, G-I, N-U), removes temp header, applies AutoFilter, and resets text wrapping.</p>
+                <button class="btn btn-primary" onclick="executeReportFormatting()">
+                    <i data-lucide="play-circle"></i>
+                    <span>Run Report Prep</span>
+                </button>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="type"></i> Typography (Whole Sheet)</h2>
+                <div class="form-group">
+                    <select id="sheet-font">
+                        <option value="Calibri">Calibri (Modern Default)</option>
+                        <option value="Calisto MT">Calisto MT (Classic Serif)</option>
+                        <option value="Times New Roman">Times New Roman (Formal)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="applySheetFont()">
+                    <i data-lucide="type"></i>
+                    <span>Apply Font to Sheet</span>
+                </button>
+            </div>
+        </div>
+
         <!-- GST Reconciliation Tab -->
-        <div id="gst-tab" class="tab-content active">
+        <div id="gst-tab" class="tab-content">
             <div class="card">
                 <h2><i data-lucide="file-check-2"></i> GST 2B vs Books Summary</h2>
                 <p class="desc">Deploy a standard reconciliation template. The engine will automatically scan your workbook for "2B" and "Purchase/Accounts" sheets to link the grand totals.</p>
@@ -621,63 +678,6 @@
             </div>
         </div>
 
-        <!-- Cleanse Tab -->
-        <div id="clean-tab" class="tab-content">
-            <div class="card">
-                <h2><i data-lucide="brush"></i> Format Selection</h2>
-                <div class="form-group">
-                    <label>Text Casing</label>
-                    <select id="clean-case">
-                        <option value="none">Don't Change Casing</option>
-                        <option value="proper">Proper Case (Capitalize Words)</option>
-                        <option value="upper">UPPER CASE</option>
-                        <option value="lower">lower case</option>
-                    </select>
-                </div>
-                <label class="checkbox-item">
-                    <input type="checkbox" id="clean-trim" checked>
-                    <span>Trim excess spaces</span>
-                </label>
-                <label class="checkbox-item">
-                    <input type="checkbox" id="clean-accounting">
-                    <span>Format as Accounting</span>
-                </label>
-                <label class="checkbox-item">
-                    <input type="checkbox" id="clean-autofit" checked>
-                    <span>Auto-fit column heights & widths</span>
-                </label>
-                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
-                    <i data-lucide="wand-2"></i>
-                    <span>Clean Selection</span>
-                </button>
-            </div>
-
-            <!-- Integrated Report Prep (VBA Port) Card -->
-            <div class="card">
-                <h2><i data-lucide="file-text"></i> Prep Report (VBA Port)</h2>
-                <p class="desc">Deletes top 4 rows, aligns headers, unmerges, fills down columns (A-B, G-I, N-U), removes temp header, applies AutoFilter, and resets text wrapping.</p>
-                <button class="btn btn-primary" onclick="executeReportFormatting()">
-                    <i data-lucide="play-circle"></i>
-                    <span>Run Report Prep</span>
-                </button>
-            </div>
-
-            <div class="card">
-                <h2><i data-lucide="type"></i> Typography (Whole Sheet)</h2>
-                <div class="form-group">
-                    <select id="sheet-font">
-                        <option value="Calibri">Calibri (Modern Default)</option>
-                        <option value="Calisto MT">Calisto MT (Classic Serif)</option>
-                        <option value="Times New Roman">Times New Roman (Formal)</option>
-                    </select>
-                </div>
-                <button class="btn btn-secondary" onclick="applySheetFont()">
-                    <i data-lucide="type"></i>
-                    <span>Apply Font to Sheet</span>
-                </button>
-            </div>
-        </div>
-
         <!-- Data Masking (Anonymizer) Tab -->
         <div id="mask-tab" class="tab-content">
             <div class="card">
@@ -728,8 +728,8 @@
     <div id="status-area"></div>
 
     <script>
-        // Array ordering of tabs for sliding swipable control
-        const tabsArray = ['gst-tab', 'pivot-tab', 'recon-tab', 'clean-tab', 'mask-tab', 'formula-tab'];
+        // Array ordering of tabs for sliding swipable control (Updated to match new order)
+        const tabsArray = ['clean-tab', 'gst-tab', 'pivot-tab', 'recon-tab', 'mask-tab', 'formula-tab'];
 
         let isOfficeInitialized = false;
 
