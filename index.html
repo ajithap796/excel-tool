@@ -541,7 +541,7 @@
                     </select>
                 </div>
                 <label class="checkbox-item">
-                    <input type="checkbox" id="clean-trim" checked>
+                    <input type="checkbox" id="clean-trim">
                     <span>Trim excess spaces</span>
                 </label>
                 <label class="checkbox-item">
@@ -549,7 +549,7 @@
                     <span>Format as Accounting</span>
                 </label>
                 <label class="checkbox-item">
-                    <input type="checkbox" id="clean-autofit" checked>
+                    <input type="checkbox" id="clean-autofit">
                     <span>Auto-fit column heights & widths</span>
                 </label>
                 <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
@@ -558,10 +558,10 @@
                 </button>
             </div>
 
-            <!-- Integrated Report Prep (VBA Port) Card -->
+            <!-- GST 2A/2B Formatting Card -->
             <div class="card">
-                <h2><i data-lucide="file-text"></i> Prep Report (VBA Port)</h2>
-                <p class="desc">Deletes top 4 rows, aligns headers, unmerges, fills down columns (A-B, G-I, N-U), removes temp header, applies AutoFilter, and resets text wrapping.</p>
+                <h2><i data-lucide="file-text"></i> Format GST 2A/2B</h2>
+                <p class="desc">Format the downloaded GST 2A and 2B Excel files by removing unwanted top rows, unmerging cells, setting a single-row header, and applying filters.</p>
                 <button class="btn btn-primary" onclick="executeReportFormatting()">
                     <i data-lucide="play-circle"></i>
                     <span>Run Report Prep</span>
