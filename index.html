@@ -94,8 +94,11 @@
             box-shadow: var(--shadow-sm);
         }
 
-        .header-icon {
-            color: #10b981;
+        /* Custom Logo Styling */
+        .header-logo {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
             filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
             animation: pulseGlow 4s infinite ease-in-out;
         }
@@ -134,7 +137,7 @@
             background: transparent;
             overflow-x: auto;
             width: 100%;
-            scrollbar-width: none; /* Hide scrollbar for standard compliant browsers */
+            scrollbar-width: none;
             cursor: grab;
             user-select: none;
         }
@@ -144,10 +147,9 @@
         }
         
         .nav-container::-webkit-scrollbar {
-            display: none; /* Hide scrollbar for Chrome/Safari */
+            display: none;
         }
 
-        /* Tabs bar - width max-content preserves size so parent handles scroll */
         .tabs {
             display: flex;
             background: rgba(15, 23, 42, 0.6);
@@ -159,9 +161,9 @@
         }
 
         .tab-btn {
-            padding: 8px 13px; /* Adjusted slightly to accommodate the transparent border */
+            padding: 8px 13px; 
             background: transparent;
-            border: 1px solid transparent; /* Added transparent border to prevent layout shifts */
+            border: 1px solid transparent; 
             border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
@@ -181,7 +183,6 @@
             background: rgba(255, 255, 255, 0.03);
         }
 
-        /* CHANGED: Active tab now uses a sleek blue border highlight instead of a solid gradient, preventing visual clash with the primary buttons */
         .tab-btn.active {
             background: rgba(31, 142, 237, 0.12);
             color: #ffffff;
@@ -203,7 +204,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            user-select: none; /* Helps with drag-to-swipe visual cleanliness */
+            user-select: none; 
         }
 
         .tab-content {
@@ -266,7 +267,7 @@
         /* Form Group and Controls */
         .form-group {
             margin-bottom: 14px;
-            user-select: text; /* Retain text selection inside forms */
+            user-select: text; 
         }
 
         label {
@@ -384,6 +385,31 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
+        /* Rainbow Button Specific Class */
+        .btn-rainbow {
+            background: linear-gradient(124deg, #ff2a2a, #ff7a00, #ffc700, #10b981, #3b82f6, #8b5cf6, #ec4899);
+            background-size: 300% 300%;
+            color: #ffffff;
+            animation: rainbowFlow 5s ease infinite;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-rainbow:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+        }
+        
+        .btn-rainbow:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+        }
+
+        @keyframes rainbowFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         /* Layout Grid and Utilities */
         .flex-row {
             display: flex;
@@ -486,10 +512,9 @@
 
     <div class="header">
         <div class="header-icon-container">
-            <i data-lucide="sparkles" class="header-icon"></i>
+            <img src="image_fd6017.png" alt="AJ Logo" class="header-logo">
         </div>
         <div class="header-text">
-            <!-- CHANGED: Updated Title -->
             <h1>AJ Toolkit <span class="version-badge">v4.0.0</span></h1>
             <p>Excel Functions</p>
         </div>
@@ -555,7 +580,8 @@
                     <input type="checkbox" id="clean-autofit">
                     <span>Auto-fit column heights & widths</span>
                 </label>
-                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
+                <!-- CHANGED: Updated class to btn-rainbow for custom rainbow effect -->
+                <button class="btn btn-rainbow" onclick="executeDataCleaning()" style="margin-top: 12px;">
                     <i data-lucide="wand-2"></i>
                     <span>Clean Selection</span>
                 </button>
