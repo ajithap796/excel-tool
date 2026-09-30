@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AJ Excel Tool</title>
+    <title>AJ Toolkit</title>
     <!-- Office.js Client Library -->
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <!-- Lucide Icons CDN -->
@@ -159,9 +159,9 @@
         }
 
         .tab-btn {
-            padding: 9px 14px;
+            padding: 8px 13px; /* Adjusted slightly to accommodate the transparent border */
             background: transparent;
-            border: none;
+            border: 1px solid transparent; /* Added transparent border to prevent layout shifts */
             border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
@@ -181,10 +181,12 @@
             background: rgba(255, 255, 255, 0.03);
         }
 
+        /* CHANGED: Active tab now uses a sleek blue border highlight instead of a solid gradient, preventing visual clash with the primary buttons */
         .tab-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: rgba(31, 142, 237, 0.12);
             color: #ffffff;
-            box-shadow: 0 4px 12px rgba(16, 124, 65, 0.25);
+            border-color: rgba(31, 142, 237, 0.6);
+            box-shadow: 0 4px 12px rgba(31, 142, 237, 0.15);
             font-weight: 600;
         }
         
@@ -487,7 +489,8 @@
             <i data-lucide="sparkles" class="header-icon"></i>
         </div>
         <div class="header-text">
-            <h1>AJ Excel Tool <span class="version-badge">v4.0.0</span></h1>
+            <!-- CHANGED: Updated Title -->
+            <h1>AJ Toolkit <span class="version-badge">v4.0.0</span></h1>
             <p>Excel Functions</p>
         </div>
     </div>
@@ -728,7 +731,7 @@
     <div id="status-area"></div>
 
     <script>
-        // Array ordering of tabs for sliding swipable control (Updated to match new order)
+        // Array ordering of tabs for sliding swipable control
         const tabsArray = ['clean-tab', 'gst-tab', 'pivot-tab', 'recon-tab', 'mask-tab', 'formula-tab'];
 
         let isOfficeInitialized = false;
