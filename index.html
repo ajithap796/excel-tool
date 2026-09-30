@@ -352,21 +352,29 @@
             outline: none;
         }
 
+        /* CHANGED: Replaced solid gradient with the animated rainbow effect for all primary buttons */
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(124deg, #ff2a2a, #ff7a00, #ffc700, #10b981, #3b82f6, #8b5cf6, #ec4899);
+            background-size: 300% 300%;
             color: #ffffff;
-            box-shadow: 0 4px 14px rgba(31, 142, 237, 0.25);
+            animation: rainbowFlow 5s ease infinite;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(31, 142, 237, 0.4);
-            background: linear-gradient(135deg, var(--primary-hover) 0%, var(--secondary-hover) 100%);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
         }
         
         .btn-primary:active {
             transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(31, 142, 237, 0.2);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+        }
+
+        @keyframes rainbowFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .btn-secondary {
@@ -383,31 +391,6 @@
         
         .btn-secondary:active {
             background: rgba(255, 255, 255, 0.02);
-        }
-
-        /* Rainbow Button Specific Class */
-        .btn-rainbow {
-            background: linear-gradient(124deg, #ff2a2a, #ff7a00, #ffc700, #10b981, #3b82f6, #8b5cf6, #ec4899);
-            background-size: 300% 300%;
-            color: #ffffff;
-            animation: rainbowFlow 5s ease infinite;
-            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-        }
-
-        .btn-rainbow:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-        }
-        
-        .btn-rainbow:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
-        }
-
-        @keyframes rainbowFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         /* Layout Grid and Utilities */
@@ -580,8 +563,7 @@
                     <input type="checkbox" id="clean-autofit">
                     <span>Auto-fit column heights & widths</span>
                 </label>
-                <!-- CHANGED: Updated class to btn-rainbow for custom rainbow effect -->
-                <button class="btn btn-rainbow" onclick="executeDataCleaning()" style="margin-top: 12px;">
+                <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
                     <i data-lucide="wand-2"></i>
                     <span>Clean Selection</span>
                 </button>
