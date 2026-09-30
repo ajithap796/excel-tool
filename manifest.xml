@@ -10,7 +10,7 @@
   <Version>1.0.0.0</Version>
   <ProviderName>ExcelMasteryDev</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Excel Mastery Suite" />
+  <DisplayName DefaultValue="AJ" />
   <Description DefaultValue="Advanced data cleaning, auto pivots, and custom fuzzy logic lookup matching engine." />
   
   <IconUrl DefaultValue="https://ajithap796.github.io/excel-tool/icon-32.png" />
@@ -77,7 +77,7 @@
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Excel Mastery" />
-        <bt:String id="ButtonLabel" DefaultValue="Open Mastery Suite" />
+        <bt:String id="ButtonLabel" DefaultValue="AJ Tool" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="ButtonTooltip" DefaultValue="Launches interactive sidebar with advanced tools." />
