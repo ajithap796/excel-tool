@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AJ Toolkit</title>
-    <!-- Office.js Client Library -->
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@0.460.0"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap');
 
@@ -21,514 +19,120 @@
             --secondary-hover: #2f9eff;
             --border-subtle: rgba(255, 255, 255, 0.08);
             --border-focus: rgba(31, 142, 237, 0.5);
-            
             --text-main: #f3f4f6;
             --text-muted: #94a3b8;
             --text-dim: #64748b;
-            
             --radius-md: 10px;
             --radius-lg: 16px;
-            
             --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
             --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.3);
             --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
-            
             --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
+        *::-webkit-scrollbar { width: 6px; height: 6px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        *::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
-        /* Custom Scrollbar styling */
-        *::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        *::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        *::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-        }
-        *::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
+        body { background: radial-gradient(circle at 50% 0%, #111b2d 0%, #080c14 100%); color: var(--text-main); font-size: 13px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            background: radial-gradient(circle at 50% 0%, #111b2d 0%, #080c14 100%);
-            color: var(--text-main);
-            font-size: 13px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        .header { background: rgba(15,23,42,0.6); backdrop-filter: blur(16px); padding: 18px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 14px; }
+        .header-icon-container { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); box-shadow: var(--shadow-sm); }
+        .header-logo { width: 22px; height: 22px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(16,185,129,0.4)); animation: pulseGlow 4s infinite ease-in-out; }
+        .header-text h1 { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: -0.2px; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .header-text p { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+        .version-badge { background: rgba(255,255,255,0.08); color: #e2e8f0; padding: 2px 6px; border-radius: 5px; font-size: 9px; font-weight: 600; border: 1px solid rgba(255,255,255,0.05); letter-spacing: 0.5px; }
 
-        /* Header Style */
-        .header {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(16px);
-            padding: 18px 20px;
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        
-        .header-icon-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: var(--shadow-sm);
-        }
+        .nav-container { padding: 12px 16px 4px 16px; background: transparent; overflow-x: auto; width: 100%; scrollbar-width: none; cursor: grab; user-select: none; }
+        .nav-container:active { cursor: grabbing; }
+        .nav-container::-webkit-scrollbar { display: none; }
+        .tabs { display: flex; background: rgba(15,23,42,0.6); padding: 5px; border-radius: 12px; border: 1px solid var(--border-subtle); width: max-content; gap: 4px; }
+        .tab-btn { padding: 8px 13px; background: transparent; border: 1px solid transparent; border-radius: 8px; font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.03); }
+        .tab-btn.active { background: rgba(31,142,237,0.12); color: #fff; border-color: rgba(31,142,237,0.6); box-shadow: 0 4px 12px rgba(31,142,237,0.15); font-weight: 600; }
+        .tab-btn i { width: 14px; height: 14px; }
 
-        /* Custom Logo Styling */
-        .header-logo {
-            width: 22px;
-            height: 22px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
-            animation: pulseGlow 4s infinite ease-in-out;
-        }
+        .workspace { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; user-select: none; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: tabFadeIn 0.35s cubic-bezier(0.16,1,0.3,1); }
+        @keyframes tabFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header-text h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: -0.2px;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .card { background: var(--surface); backdrop-filter: blur(16px); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-md); border: 1px solid var(--border-subtle); margin-bottom: 16px; transition: var(--transition); }
+        .card:hover { border-color: rgba(31,142,237,0.25); box-shadow: 0 12px 30px rgba(0,0,0,0.45); }
+        .card h2 { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; color: #fff; }
+        .card h2 i { color: var(--secondary); width: 16px; height: 16px; }
+        .card p.desc { font-size: 11px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
 
-        .header-text p {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 1px;
-        }
+        .form-group { margin-bottom: 14px; user-select: text; }
+        label { display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
 
-        .version-badge {
-            background: rgba(255, 255, 255, 0.08);
-            color: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 5px;
-            font-size: 9px;
-            font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            letter-spacing: 0.5px;
-        }
+        select, input[type="text"], input[type="number"] { width: 100%; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); background: rgba(15,23,42,0.6); font-size: 12.5px; color: var(--text-main); outline: none; transition: var(--transition); }
+        select:focus, input[type="text"]:focus, input[type="number"]:focus { border-color: var(--secondary); background: rgba(15,23,42,0.9); box-shadow: 0 0 0 3px rgba(31,142,237,0.15); }
+        select option { background-color: #0b0f19; color: var(--text-main); }
 
-        /* Tab Navigation - Scrollable Outer Container */
-        .nav-container {
-            padding: 12px 16px 4px 16px;
-            background: transparent;
-            overflow-x: auto;
-            width: 100%;
-            scrollbar-width: none;
-            cursor: grab;
-            user-select: none;
-        }
-        
-        .nav-container:active {
-            cursor: grabbing;
-        }
-        
-        .nav-container::-webkit-scrollbar {
-            display: none;
-        }
+        .checkbox-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; border-radius: var(--radius-md); background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); transition: var(--transition); }
+        .checkbox-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+        .checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-item span { font-size: 12px; color: var(--text-main); user-select: none; }
 
-        .tabs {
-            display: flex;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 5px;
-            border-radius: 12px;
-            border: 1px solid var(--border-subtle);
-            width: max-content;
-            gap: 4px;
-        }
+        .btn { width: 100%; padding: 11px 16px; border-radius: var(--radius-md); font-size: 12.5px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; outline: none; }
+        .btn-primary { background: linear-gradient(124deg, #ff2a2a, #ff7a00, #ffc700, #10b981, #3b82f6, #8b5cf6, #ec4899); background-size: 300% 300%; color: #fff; animation: rainbowFlow 5s ease infinite; box-shadow: 0 4px 14px rgba(139,92,246,0.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,92,246,0.5); }
+        .btn-primary:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(139,92,246,0.2); }
+        @keyframes rainbowFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .btn-secondary { background: rgba(255,255,255,0.04); color: var(--text-main); border: 1px solid rgba(255,255,255,0.08); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #fff; }
+        .btn-secondary:active { background: rgba(255,255,255,0.02); }
+        .btn-gap { margin-bottom: 12px; }
 
-        .tab-btn {
-            padding: 8px 13px; 
-            background: transparent;
-            border: 1px solid transparent; 
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
+        .flex-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-        .tab-btn:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.03);
-        }
+        .formula-result { background: rgba(15,23,42,0.8); padding: 14px; border-radius: var(--radius-md); border-left: 4px solid var(--secondary); font-family: 'Consolas','Courier New',monospace; font-size: 11.5px; color: #38bdf8; margin-bottom: 12px; display: none; word-wrap: break-word; border-top: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); user-select: text; }
+        .formula-desc { font-size: 11.5px; color: var(--text-muted); margin-bottom: 10px; display: none; line-height: 1.5; }
+        .alt-wrap { display: none; margin-bottom: 12px; }
+        .alt-wrap .alt-title { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+        .alt-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); border-radius: 8px; padding: 5px 9px; font-size: 10.5px; cursor: pointer; margin: 0 6px 6px 0; font-family: 'Consolas','Courier New',monospace; }
+        .alt-btn:hover { color: #fff; border-color: rgba(31,142,237,0.5); }
 
-        .tab-btn.active {
-            background: rgba(31, 142, 237, 0.12);
-            color: #ffffff;
-            border-color: rgba(31, 142, 237, 0.6);
-            box-shadow: 0 4px 12px rgba(31, 142, 237, 0.15);
-            font-weight: 600;
-        }
-        
-        .tab-btn i {
-            width: 14px;
-            height: 14px;
-        }
+        details.map-box { margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 10px 12px; background: rgba(255,255,255,0.02); }
+        details.map-box summary { cursor: pointer; font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
+        .map-block { margin-top: 12px; }
+        .map-block h3 { font-size: 11.5px; color: #fff; margin-bottom: 8px; font-family: 'Outfit', sans-serif; }
+        .sheet-checks { max-height: 150px; overflow-y: auto; margin-bottom: 12px; }
+        .hint-line { font-size: 10.5px; color: var(--text-dim); margin-top: 6px; line-height: 1.4; }
 
-        /* Workspace and Layout */
-        .workspace {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            user-select: none; 
-        }
+        #status-area { position: fixed; bottom: 20px; left: 20px; right: 20px; display: none; padding: 14px 18px; border-radius: var(--radius-md); font-size: 12px; font-weight: 500; text-align: center; z-index: 1000; box-shadow: var(--shadow-lg); backdrop-filter: blur(16px); animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); border: 1px solid; }
+        .status-success { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3); }
+        .status-error { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3); }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: tabFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes tabFadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Card Styles */
-        .card {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-subtle);
-            margin-bottom: 16px;
-            transition: var(--transition);
-        }
-        
-        .card:hover {
-            border-color: rgba(31, 142, 237, 0.25);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-        }
-
-        .card h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 10px;
-            color: #ffffff;
-        }
-        
-        .card h2 i {
-            color: var(--secondary);
-            width: 16px;
-            height: 16px;
-        }
-
-        .card p.desc {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 18px;
-            line-height: 1.5;
-        }
-
-        /* Form Group and Controls */
-        .form-group {
-            margin-bottom: 14px;
-            user-select: text; 
-        }
-
-        label {
-            display: block;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
-        select, input[type="text"] {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(15, 23, 42, 0.6);
-            font-size: 12.5px;
-            color: var(--text-main);
-            outline: none;
-            transition: var(--transition);
-        }
-
-        select:focus, input[type="text"]:focus {
-            border-color: var(--secondary);
-            background: rgba(15, 23, 42, 0.9);
-            box-shadow: 0 0 0 3px rgba(31, 142, 237, 0.15);
-        }
-        
-        select option {
-            background-color: #0b0f19;
-            color: var(--text-main);
-        }
-        
-        /* Checkboxes */
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: var(--transition);
-        }
-
-        .checkbox-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.08);
-        }
-
-        .checkbox-item input {
-            accent-color: var(--primary);
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        
-        .checkbox-item span {
-            font-size: 12px;
-            color: var(--text-main);
-            user-select: none;
-        }
-
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 11px 16px;
-            border-radius: var(--radius-md);
-            font-size: 12.5px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            outline: none;
-        }
-
-        /* CHANGED: Replaced solid gradient with the animated rainbow effect for all primary buttons */
-        .btn-primary {
-            background: linear-gradient(124deg, #ff2a2a, #ff7a00, #ffc700, #10b981, #3b82f6, #8b5cf6, #ec4899);
-            background-size: 300% 300%;
-            color: #ffffff;
-            animation: rainbowFlow 5s ease infinite;
-            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
-        }
-
-        @keyframes rainbowFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-main);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-        }
-        
-        .btn-secondary:active {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        /* Layout Grid and Utilities */
-        .flex-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        
-        .range-display {
-            flex: 1;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 11px;
-            color: #34d399;
-            background: rgba(16, 185, 129, 0.04) !important;
-            border: 1px solid rgba(16, 185, 129, 0.2) !important;
-            text-align: center;
-        }
-
-        /* Formula Results Styling */
-        .formula-result {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 14px;
-            border-radius: var(--radius-md);
-            border-left: 4px solid var(--secondary);
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 11.5px;
-            color: #38bdf8;
-            margin-bottom: 12px;
-            display: none;
-            word-wrap: break-word;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            border-right: 1px solid rgba(255, 255, 255, 0.04);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        
-        .formula-desc {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            display: none;
-            line-height: 1.5;
-        }
-
-        /* Floating Status Alerts */
-        #status-area {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            display: none;
-            padding: 14px 18px;
-            border-radius: var(--radius-md);
-            font-size: 12px;
-            font-weight: 500;
-            text-align: center;
-            z-index: 1000;
-            box-shadow: var(--shadow-lg);
-            backdrop-filter: blur(16px);
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid;
-        }
-
-        .status-success {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        .status-error {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        /* Swipe Instruction Badge */
-        .swipe-hint {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-top: -4px;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px) scale(0.95); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3)); opacity: 0.85; }
-            50% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6)); opacity: 1; }
-        }
+        .swipe-hint { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 10px; color: var(--text-dim); margin-top: -4px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.6px; }
+        @keyframes slideUp { from { transform: translateY(20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes pulseGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(16,185,129,0.3)); opacity: 0.85; } 50% { filter: drop-shadow(0 0 10px rgba(16,185,129,0.6)); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-icon-container">
-            <img src="image_fd6017.png" alt="AJ Logo" class="header-logo">
+            <img id="hdr-logo" src="image_fd6017.png" alt="AJ Logo" class="header-logo">
         </div>
         <div class="header-text">
-            <h1>AJ Toolkit <span class="version-badge">v4.0.0</span></h1>
+            <h1>AJ Toolkit <span class="version-badge">v5.0.0</span></h1>
             <p>Excel Functions</p>
         </div>
     </div>
 
     <div class="nav-container">
         <div class="tabs">
-            <button id="btn-clean-tab" class="tab-btn active" onclick="switchTab('clean-tab', this)">
-                <i data-lucide="sparkles"></i>
-                <span>Cleanse</span>
-            </button>
-            <button id="btn-gst-tab" class="tab-btn" onclick="switchTab('gst-tab', this)">
-                <i data-lucide="file-spreadsheet"></i>
-                <span>GST Reco</span>
-            </button>
-            <button id="btn-pivot-tab" class="tab-btn" onclick="switchTab('pivot-tab', this)">
-                <i data-lucide="table-properties"></i>
-                <span>Pivot</span>
-            </button>
-            <button id="btn-recon-tab" class="tab-btn" onclick="switchTab('recon-tab', this)">
-                <i data-lucide="git-compare"></i>
-                <span>Match</span>
-            </button>
-            <button id="btn-mask-tab" class="tab-btn" onclick="switchTab('mask-tab', this)">
-                <i data-lucide="shield"></i>
-                <span>Mask</span>
-            </button>
-            <button id="btn-formula-tab" class="tab-btn" onclick="switchTab('formula-tab', this)">
-                <i data-lucide="function-square"></i>
-                <span>Funcs</span>
-            </button>
+            <button id="btn-clean-tab" class="tab-btn active" onclick="switchTab('clean-tab', this)"><i data-lucide="sparkles"></i><span>Cleanse</span></button>
+            <button id="btn-gst-tab" class="tab-btn" onclick="switchTab('gst-tab', this)"><i data-lucide="file-spreadsheet"></i><span>GST Reco</span></button>
+            <button id="btn-pivot-tab" class="tab-btn" onclick="switchTab('pivot-tab', this)"><i data-lucide="table-properties"></i><span>Pivot</span></button>
+            <button id="btn-tools-tab" class="tab-btn" onclick="switchTab('tools-tab', this)"><i data-lucide="wrench"></i><span>Tools</span></button>
+            <button id="btn-mask-tab" class="tab-btn" onclick="switchTab('mask-tab', this)"><i data-lucide="shield"></i><span>Mask</span></button>
+            <button id="btn-formula-tab" class="tab-btn" onclick="switchTab('formula-tab', this)"><i data-lucide="function-square"></i><span>Funcs</span></button>
         </div>
     </div>
 
@@ -538,7 +142,7 @@
             <span>Swipe workspace or drag tab bar to navigate</span>
         </div>
 
-        <!-- Cleanse Tab -->
+        <!-- Cleanse Tab (unchanged) -->
         <div id="clean-tab" class="tab-content active">
             <div class="card">
                 <h2><i data-lucide="brush"></i> Format Selection</h2>
@@ -551,31 +155,11 @@
                         <option value="lower">lower case</option>
                     </select>
                 </div>
-                <label class="checkbox-item">
-                    <input type="checkbox" id="clean-trim">
-                    <span>Trim excess spaces</span>
-                </label>
-                <label class="checkbox-item">
-                    <input type="checkbox" id="clean-accounting">
-                    <span>Format as Accounting</span>
-                </label>
-                <label class="checkbox-item">
-                    <input type="checkbox" id="clean-autofit">
-                    <span>Auto-fit column heights & widths</span>
-                </label>
+                <label class="checkbox-item"><input type="checkbox" id="clean-trim"><span>Trim excess spaces</span></label>
+                <label class="checkbox-item"><input type="checkbox" id="clean-accounting"><span>Format as Accounting</span></label>
+                <label class="checkbox-item"><input type="checkbox" id="clean-autofit"><span>Auto-fit column heights & widths</span></label>
                 <button class="btn btn-primary" onclick="executeDataCleaning()" style="margin-top: 12px;">
-                    <i data-lucide="wand-2"></i>
-                    <span>Clean Selection</span>
-                </button>
-            </div>
-
-            <!-- GST 2A/2B Formatting Card -->
-            <div class="card">
-                <h2><i data-lucide="file-text"></i> Format GST 2A/2B</h2>
-                <p class="desc">Format the downloaded GST 2A and 2B Excel files by removing unwanted top rows, unmerging cells, setting a single-row header, and applying filters.</p>
-                <button class="btn btn-primary" onclick="executeReportFormatting()">
-                    <i data-lucide="play-circle"></i>
-                    <span>Run Report Prep</span>
+                    <i data-lucide="wand-2"></i><span>Clean Selection</span>
                 </button>
             </div>
 
@@ -589,48 +173,62 @@
                     </select>
                 </div>
                 <button class="btn btn-secondary" onclick="applySheetFont()">
-                    <i data-lucide="type"></i>
-                    <span>Apply Font to Sheet</span>
+                    <i data-lucide="type"></i><span>Apply Font to Sheet</span>
                 </button>
             </div>
         </div>
 
-        <!-- GST Reconciliation Tab -->
+        <!-- GST Tab -->
         <div id="gst-tab" class="tab-content">
             <div class="card">
-                <h2><i data-lucide="file-check-2"></i> GST 2B vs Books Summary</h2>
-                <p class="desc">Deploy a standard reconciliation template. The engine will automatically scan your workbook for "2B" and "Purchase/Accounts" sheets to link the grand totals.</p>
+                <h2><i data-lucide="file-text"></i> Format GST 2A/2B</h2>
+                <p class="desc">Tick the downloaded 2A/2B sheets to format. Each sheet: top rows removed, merged headers unmerged and collapsed into one header row, filter applied, top row frozen. Sheets that already have a filter are skipped, so running twice is safe.</p>
+                <button class="btn btn-secondary btn-gap" onclick="loadPrepSheets()"><i data-lucide="list-checks"></i><span>Load Sheets</span></button>
+                <div id="prep-sheets" class="sheet-checks"></div>
                 <div class="form-group">
-                    <label>Output Sheet Name</label>
-                    <input type="text" id="gst-sheet-name" value="GST_Reconciliation" placeholder="e.g., May_GST_Reco">
+                    <label>Rows above the header to delete</label>
+                    <input type="number" id="prep-rows" value="4" min="0">
                 </div>
-                <button class="btn btn-primary" onclick="deployGSTSummary()">
-                    <i data-lucide="arrow-up-right-square"></i>
-                    <span>Deploy & Auto-Link</span>
-                </button>
+                <button class="btn btn-primary" onclick="executeReportFormatting()"><i data-lucide="play-circle"></i><span>Format Ticked Sheets</span></button>
+            </div>
+
+            <div class="card">
+                <h2><i data-lucide="file-check-2"></i> 2B vs Books: Summary + Match</h2>
+                <p class="desc">Scan the workbook, confirm sheets and columns, then build an invoice-level match sheet and a linked summary. Tier 1: Date + GSTIN + Name + Invoice No + Taxable + GST. Tier 2: Date + fuzzy Invoice No + fuzzy Name + Taxable.</p>
+                <button class="btn btn-secondary btn-gap" onclick="scanGSTWorkbook()"><i data-lucide="scan-search"></i><span>Scan Workbook</span></button>
+                <div id="gst-roles"></div>
+                <details class="map-box" id="gst-map-box">
+                    <summary>Column mapping (auto-detected, change if wrong)</summary>
+                    <div id="gst-map"></div>
+                </details>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Amount tolerance (Rs)</label>
+                        <input type="number" id="gst-tol" value="1" min="0" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Output Sheet Name</label>
+                        <input type="text" id="gst-sheet-name" value="GST_Reconciliation">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="buildGST()"><i data-lucide="arrow-up-right-square"></i><span>Build Summary + Match</span></button>
+                <p class="hint-line">Rows 10, 11, 16 and 20 of the summary (RCM/expense adds, amended invoices) stay manual. Credit notes and RCM come from their own sheets.</p>
             </div>
         </div>
-        
-        <!-- Dynamic Pivot Tab -->
+
+        <!-- Pivot Tab -->
         <div id="pivot-tab" class="tab-content">
             <div class="card">
                 <h2><i data-lucide="layout-grid"></i> Dynamic Pivot Summary</h2>
-                <p class="desc">Highlight your data table (with headers) and load to build a structured visual summary.</p>
-                <button class="btn btn-secondary" onclick="loadPivotHeaders()" style="margin-bottom: 16px;">
-                    <i data-lucide="download-cloud"></i>
-                    <span>Load Data Headers</span>
-                </button>
+                <p class="desc">Highlight your data table (with headers) and load to build a structured visual summary. The source range is remembered even if you change sheets.</p>
+                <button class="btn btn-secondary" onclick="loadPivotHeaders()" style="margin-bottom: 16px;"><i data-lucide="download-cloud"></i><span>Load Data Headers</span></button>
                 <div class="form-group">
                     <label>Group By (Rows)</label>
-                    <select id="pivot-row-select">
-                        <option>Load headers first...</option>
-                    </select>
+                    <select id="pivot-row-select"><option>Load headers first...</option></select>
                 </div>
                 <div class="form-group">
                     <label>Value to Summarize</label>
-                    <select id="pivot-val-select">
-                        <option>Load headers first...</option>
-                    </select>
+                    <select id="pivot-val-select"><option>Load headers first...</option></select>
                 </div>
                 <div class="form-group">
                     <label>Aggregation Method</label>
@@ -640,125 +238,120 @@
                         <option value="Average">Average</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" onclick="executeDynamicPivot()">
-                    <i data-lucide="play"></i>
-                    <span>Generate Summary</span>
-                </button>
+                <button class="btn btn-primary" onclick="executeDynamicPivot()"><i data-lucide="play"></i><span>Generate Summary</span></button>
             </div>
         </div>
 
-        <!-- List Matcher Tab -->
-        <div id="recon-tab" class="tab-content">
+        <!-- Tools Tab -->
+        <div id="tools-tab" class="tab-content">
             <div class="card">
-                <h2><i data-lucide="scale"></i> Intelligent List Matcher</h2>
-                <p class="desc">Customize list labels, define custom cell ranges from active sheets, and map matching outputs.</p>
-                
-                <div class="form-group">
-                    <label>List A Name</label>
-                    <input type="text" id="name-a" value="Internal Data" placeholder="e.g., Tally Export">
-                    <div class="flex-row">
-                        <button class="btn btn-secondary" onclick="setReconRange('A')">
-                            <i data-lucide="expand"></i>
-                            <span>Set Range A</span>
-                        </button>
-                        <input type="text" id="range-a-display" placeholder="No range selected" disabled class="range-display">
-                    </div>
+                <h2><i data-lucide="indian-rupee"></i> Amount to Words</h2>
+                <p class="desc">Select number cells. Words (lakh / crore) are written to the output column you type. Nothing is overwritten: if the output cells are not empty, the tool stops.</p>
+                <div class="grid-2">
+                    <div class="form-group"><label>Output column</label><input type="text" id="atw-col" placeholder="e.g. F" maxlength="3"></div>
+                    <div class="form-group"><label>Prefix</label><input type="text" id="atw-prefix" value="Rupees"></div>
                 </div>
+                <div class="form-group"><label>Suffix</label><input type="text" id="atw-suffix" value="Only"></div>
+                <button class="btn btn-primary" onclick="executeAmountToWords()"><i data-lucide="spell-check"></i><span>Convert Selection</span></button>
+            </div>
 
+            <div class="card">
+                <h2><i data-lucide="split"></i> Split Sheet by Column</h2>
+                <p class="desc">Highlight a data table with headers, load, pick the column. One new sheet per unique value, header row copied. Maximum 100 groups.</p>
+                <button class="btn btn-secondary btn-gap" onclick="loadSplitHeaders()"><i data-lucide="download-cloud"></i><span>Load Data Headers</span></button>
                 <div class="form-group">
-                    <label>List B Name</label>
-                    <input type="text" id="name-b" value="Vendor Data" placeholder="e.g., Portal">
-                    <div class="flex-row">
-                        <button class="btn btn-secondary" onclick="setReconRange('B')">
-                            <i data-lucide="expand"></i>
-                            <span>Set Range B</span>
-                        </button>
-                        <input type="text" id="range-b-display" placeholder="No range selected" disabled class="range-display">
-                    </div>
+                    <label>Split by column</label>
+                    <select id="split-col-select"><option>Load headers first...</option></select>
                 </div>
+                <button class="btn btn-primary" onclick="executeSplit()"><i data-lucide="scissors"></i><span>Split into Sheets</span></button>
+            </div>
 
+            <div class="card">
+                <h2><i data-lucide="printer"></i> Invoice Print Setup</h2>
+                <p class="desc">Select the invoice area. One click sets print area, A4, fit to one page, margins and centering. Then press Ctrl+P and choose Save as PDF.</p>
                 <div class="form-group">
-                    <label>Output Sheet Name</label>
-                    <input type="text" id="recon-sheet-name" value="Match_Report" placeholder="Name the new sheet">
+                    <label>Orientation</label>
+                    <select id="print-orient">
+                        <option value="Portrait">Portrait</option>
+                        <option value="Landscape">Landscape</option>
+                    </select>
                 </div>
+                <button class="btn btn-primary" onclick="executePrintSetup()"><i data-lucide="file-output"></i><span>Set Up Page for PDF</span></button>
+            </div>
 
-                <button class="btn btn-primary" onclick="executeReconciliation()" style="margin-top: 10px;">
-                    <i data-lucide="rocket"></i>
-                    <span>Run Match Report</span>
-                </button>
+            <div class="card">
+                <h2><i data-lucide="briefcase"></i> Workbook Utilities</h2>
+                <button class="btn btn-secondary btn-gap" onclick="createSheetIndex()"><i data-lucide="list"></i><span>Create Sheet Index with Links</span></button>
+                <button class="btn btn-secondary btn-gap" onclick="unhideAllSheets()"><i data-lucide="eye"></i><span>Unhide All Sheets</span></button>
+                <button class="btn btn-secondary btn-gap" onclick="deleteBlankRows()"><i data-lucide="rows-3"></i><span>Delete Blank Rows (active sheet)</span></button>
+                <button class="btn btn-secondary" onclick="deleteBlankCols()"><i data-lucide="columns-3"></i><span>Delete Blank Columns (active sheet)</span></button>
             </div>
         </div>
 
-        <!-- Data Masking (Anonymizer) Tab -->
+        <!-- Mask Tab -->
         <div id="mask-tab" class="tab-content">
             <div class="card">
                 <h2><i data-lucide="shield-alert"></i> Compliance Data Masker</h2>
-                <p class="desc">Select a cell range containing sensitive business parameters. Choose a masking profile to overwrite and anonymize values before sharing worksheets.</p>
+                <p class="desc">Select a range with sensitive values. Formula cells are never overwritten. Cells that do not fit the chosen profile are left untouched and counted.</p>
                 <div class="form-group">
                     <label>Masking Profile</label>
                     <select id="mask-type">
-                        <option value="email">Email Addresses (e.g., a***b@domain.com)</option>
-                        <option value="phone">Phone Numbers (e.g., ******9876)</option>
-                        <option value="numeric">All Numbers (e.g., 5432 -> ****)</option>
-                        <option value="all">Full Masking (e.g., confidential -> *****)</option>
+                        <option value="email">Email Addresses (a***b@domain.com)</option>
+                        <option value="phone">Phone Numbers (******9876)</option>
+                        <option value="pan">PAN (******234F)</option>
+                        <option value="gstin">GSTIN (27**********1Z5)</option>
+                        <option value="aadhaar">Aadhaar (**** **** 1234)</option>
+                        <option value="bank">Bank Account (********4321)</option>
+                        <option value="numeric">All Numbers (5432 -> ****)</option>
+                        <option value="all">Full Masking (confidential -> ************)</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" onclick="executeDataMasking()">
-                    <i data-lucide="shield"></i>
-                    <span>Apply Masking</span>
-                </button>
+                <button class="btn btn-primary" onclick="executeDataMasking()"><i data-lucide="shield"></i><span>Apply Masking</span></button>
             </div>
         </div>
 
-        <!-- Formula Finder Tab -->
+        <!-- Formula Tab -->
         <div id="formula-tab" class="tab-content">
             <div class="card">
                 <h2><i data-lucide="help-circle"></i> Formula Finder</h2>
-                <p class="desc">Describe what you want to do (e.g. "search for a value", "add conditionally", "combine text").</p>
+                <p class="desc">Describe what you want to do (e.g. "sum with conditions", "look up a value", "combine text").</p>
                 <div class="form-group">
-                    <input type="text" id="formula-search" placeholder="E.g. find a value, count blanks...">
+                    <input type="text" id="formula-search" placeholder="E.g. find a value, count blanks..." onkeydown="if(event.key==='Enter')searchFormula()">
                 </div>
-                <button class="btn btn-secondary" onclick="searchFormula()" style="margin-bottom: 16px;">
-                    <i data-lucide="search"></i>
-                    <span>Find Formula</span>
-                </button>
-                
+                <button class="btn btn-secondary" onclick="searchFormula()" style="margin-bottom: 16px;"><i data-lucide="search"></i><span>Find Formula</span></button>
                 <div id="f-desc" class="formula-desc"></div>
                 <div id="f-result" class="formula-result"></div>
-                
-                <button id="f-insert-btn" class="btn btn-primary" onclick="insertFormula()" style="display:none;">
-                    <i data-lucide="plus-circle"></i>
-                    <span>Insert into Active Cell</span>
-                </button>
+                <div id="f-alt" class="alt-wrap"></div>
+                <button id="f-insert-btn" class="btn btn-primary" onclick="insertFormula()" style="display:none;"><i data-lucide="plus-circle"></i><span>Insert into Active Cell</span></button>
             </div>
         </div>
-
     </div>
 
-    <!-- Toast Notifications -->
     <div id="status-area"></div>
 
     <script>
-        // Array ordering of tabs for sliding swipable control
-        const tabsArray = ['clean-tab', 'gst-tab', 'pivot-tab', 'recon-tab', 'mask-tab', 'formula-tab'];
-
+        const tabsArray = ['clean-tab', 'gst-tab', 'pivot-tab', 'tools-tab', 'mask-tab', 'formula-tab'];
         let isOfficeInitialized = false;
+        let dragMoved = false;
 
-        // Initialize Lucide Icons on load
         window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
             initSwipableWorkspace();
             initDragScrollTabs();
+            const logo = document.getElementById('hdr-logo');
+            logo.onerror = () => {
+                logo.onerror = null;
+                logo.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="12" y="17" font-size="13" font-weight="700" text-anchor="middle" fill="#34d399" font-family="Arial">AJ</text></svg>');
+            };
         });
 
-        Office.onReady((info) => { 
+        Office.onReady((info) => {
             if (info.host === Office.HostType.Excel) {
                 isOfficeInitialized = true;
-                console.log("Engine Online v4.0.0."); 
+                console.log("Engine Online v5.0.0.");
             }
         });
 
-        // Helper to check Office.js initialization
         function checkOffice() {
             if (!isOfficeInitialized) {
                 showStatus("Office.js is not loaded yet. If running in a web browser, please launch this inside Excel.", true);
@@ -767,415 +360,145 @@
             return true;
         }
 
-        // Switch tab visually and scroll header buttons dynamically
         function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
-            // Map element if not directly provided (e.g. during swipe)
-            if (!el) {
-                el = document.getElementById('btn-' + tabId);
-            }
-            
+            if (!el) el = document.getElementById('btn-' + tabId);
             if (el) {
                 el.classList.add('active');
-                
-                // Centered auto-scroll using standard scrollIntoView API
                 el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
-            
             document.getElementById('status-area').style.display = 'none';
         }
 
-        // Setup pointer dragging gesture events for swipe navigation
         function initSwipableWorkspace() {
             const workspace = document.querySelector('.workspace');
-            let pointerStartX = 0;
-            let pointerStartY = 0;
-            let isPointerDown = false;
-
+            let sx = 0, sy = 0, down = false;
             workspace.addEventListener('pointerdown', e => {
-                // Ignore dragging inside input areas, dropdown selects, and action buttons to allow text highlight/click
-                if (e.target.closest('input') || e.target.closest('select') || e.target.closest('button')) {
-                    return;
-                }
-                pointerStartX = e.clientX;
-                pointerStartY = e.clientY;
-                isPointerDown = true;
+                if (e.target.closest('input') || e.target.closest('select') || e.target.closest('button') || e.target.closest('details') || e.target.closest('.sheet-checks')) return;
+                sx = e.clientX; sy = e.clientY; down = true;
             });
-
             workspace.addEventListener('pointerup', e => {
-                if (!isPointerDown) return;
-                isPointerDown = false;
-                
-                const pointerEndX = e.clientX;
-                const pointerEndY = e.clientY;
-                
-                const minSwipeDistance = 60; // minimum X distance to switch tabs
-                const maxVerticalOffset = 40; // ignore horizontal swipe if vertical shift is too large
-                
-                const diffX = pointerEndX - pointerStartX;
-                const diffY = pointerEndY - pointerStartY;
-                
-                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffY) < maxVerticalOffset) {
-                    if (Math.abs(diffX) > minSwipeDistance) {
-                        const activeTabContent = document.querySelector('.tab-content.active');
-                        if (activeTabContent) {
-                            const currentIndex = tabsArray.indexOf(activeTabContent.id);
-                            if (diffX < 0) {
-                                // Swiped Left -> Switch to Next Tab
-                                if (currentIndex < tabsArray.length - 1) {
-                                    const nextTabId = tabsArray[currentIndex + 1];
-                                    switchTab(nextTabId);
-                                }
-                            } else {
-                                // Swiped Right -> Switch to Previous Tab
-                                if (currentIndex > 0) {
-                                    const prevTabId = tabsArray[currentIndex - 1];
-                                    switchTab(prevTabId);
-                                }
-                            }
-                        }
-                    }
+                if (!down) return;
+                down = false;
+                const sel = window.getSelection ? window.getSelection().toString() : '';
+                if (sel) return; // user was selecting text, not swiping
+                const dx = e.clientX - sx, dy = e.clientY - sy;
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dy) < 40 && Math.abs(dx) > 60) {
+                    const active = document.querySelector('.tab-content.active');
+                    if (!active) return;
+                    const i = tabsArray.indexOf(active.id);
+                    if (dx < 0 && i < tabsArray.length - 1) switchTab(tabsArray[i + 1]);
+                    if (dx > 0 && i > 0) switchTab(tabsArray[i - 1]);
                 }
             });
         }
 
-        // Implement horizontal click-and-drag scrolling for the tab header container (nav-container) on desktop
         function initDragScrollTabs() {
             const slider = document.querySelector('.nav-container');
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            slider.addEventListener('mousedown', (e) => {
-                isDown = true;
-                startX = e.pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
-            });
-            
-            slider.addEventListener('mouseleave', () => {
-                isDown = false;
-            });
-            
-            slider.addEventListener('mouseup', () => {
-                isDown = false;
-            });
-            
-            slider.addEventListener('mousemove', (e) => {
-                if(!isDown) return;
-                e.preventDefault(); // prevents highlighting and standard drag interrupts
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 1.5; // multiplier controls dragging sensitivity
+            let isDown = false, startX = 0, scrollLeft = 0;
+            slider.addEventListener('mousedown', e => { isDown = true; dragMoved = false; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
+            slider.addEventListener('mouseleave', () => { isDown = false; });
+            slider.addEventListener('mouseup', () => { isDown = false; });
+            slider.addEventListener('mousemove', e => {
+                if (!isDown) return;
+                e.preventDefault();
+                const walk = ((e.pageX - slider.offsetLeft) - startX) * 1.5;
+                if (Math.abs(walk) > 5) dragMoved = true;
                 slider.scrollLeft = scrollLeft - walk;
             });
+            // a drag must not also count as a tab click
+            slider.addEventListener('click', e => { if (dragMoved) { e.stopPropagation(); e.preventDefault(); dragMoved = false; } }, true);
         }
 
-        // Animated status notification toaster
         function showStatus(msg, isError = false) {
             const el = document.getElementById('status-area');
             el.innerText = msg;
             el.className = isError ? 'status-error' : 'status-success';
             el.style.display = 'block';
-            
-            if (window.statusTimeout) {
-                clearTimeout(window.statusTimeout);
+            if (window.statusTimeout) clearTimeout(window.statusTimeout);
+            window.statusTimeout = setTimeout(() => { el.style.display = 'none'; }, 7000);
+        }
+
+        /* ---------- SHARED HELPERS ---------- */
+        function colLetter(i) { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+        function colIndex(letters) { let n = 0; for (const ch of letters.toUpperCase()) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; }
+        function safeSheetName(s) { return String(s).replace(/[\\\/*?:\[\]]/g, '').trim().substring(0, 31) || 'Sheet'; }
+        function qs(name) { return "'" + String(name).replace(/'/g, "''") + "'"; }
+        async function sheetExists(ctx, name) {
+            const s = ctx.workbook.worksheets.getItemOrNullObject(name);
+            s.load('isNullObject');
+            await ctx.sync();
+            return !s.isNullObject;
+        }
+        async function uniqueSheetName(ctx, base) {
+            base = safeSheetName(base);
+            let name = base, n = 2;
+            while (await sheetExists(ctx, name)) {
+                const suffix = '_' + n++;
+                name = base.substring(0, 31 - suffix.length) + suffix;
             }
-            window.statusTimeout = setTimeout(() => { 
-                el.style.display = 'none'; 
-            }, 6000); 
+            return name;
         }
-
-        /* --- GST SUMMARY DEPLOYER (v3.1.2 AUTO-LINKING ENGINE) --- */
-        async function deployGSTSummary() {
-            if (!checkOffice()) return;
-            showStatus("Scanning workbook & building Summary...");
-            try {
-                await Excel.run(async (context) => {
-                    let rawOutName = document.getElementById('gst-sheet-name').value || "GST_Reconciliation";
-                    let outName = rawOutName.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
-                    
-                    const targetSheet = context.workbook.worksheets.add(outName);
-                    
-                    // Step 1: Scan workbook for target sheets
-                    const sheets = context.workbook.worksheets;
-                    sheets.load("items/name");
-                    await context.sync();
-
-                    let name2B = ""; let nameBooks = "";
-                    sheets.items.forEach(s => {
-                        let ln = s.name.toLowerCase();
-                        if (ln.includes("2b")) name2B = s.name;
-                        if (ln.includes("purchase") || ln.includes("book") || ln.includes("account")) nameBooks = s.name;
-                    });
-
-                    // Step 2: Smart Header Locator
-                    async function scanHeaders(sheetName) {
-                        if(!sheetName) return ["", "", "", ""];
-                        try {
-                            let s = context.workbook.worksheets.getItem(sheetName);
-                            let r = s.getRange("A1:Z5"); // Scans top 5 rows
-                            r.load("values");
-                            await context.sync();
-                            let map = ["", "", "", ""];
-                            for(let row=0; row<5; row++) {
-                                for(let col=0; col<26; col++) {
-                                    let val = String(r.values[row][col] || "").toLowerCase().replace(/[^a-z]/g, '');
-                                    let letter = String.fromCharCode(65 + col); // Maps index 0 to A, 1 to B, etc.
-                                    
-                                    if(val.includes("taxable")) map[0] = letter;
-                                    else if(val === "cgst" || val.includes("central")) map[1] = letter;
-                                    else if(val === "sgst" || val.includes("state")) map[2] = letter;
-                                    else if(val === "igst" || val.includes("integrated")) map[3] = letter;
-                                }
-                            }
-                            return map;
-                        } catch(e) { return ["", "", "", ""]; }
-                    }
-
-                    let bMap = await scanHeaders(nameBooks);
-                    let tMap = await scanHeaders(name2B);
-
-                    // Step 3: Build Grid
-                    const tableData = [
-                        ["PARTICULARS", "Taxable Value", "CGST", "SGST", "IGST"], 
-                        ["Input invoices as per accounts (Purchase)", "", "", "", ""], 
-                        ["Input invoices as per accounts (Expense)", "", "", "", ""], 
-                        ["Less: Credit note as per accounts", "", "", "", ""], 
-                        ["Less: RCM Expenses", "", "", "", ""], 
-                        ["Net input as per accounts", "", "", "", ""], 
-                        ["", "", "", "", ""], 
-                        ["Add:", "", "", "", ""], 
-                        ["Input invoices in 2B not in accounts", "", "", "", ""], 
-                        ["Reverse Charge", "", "", "", ""], 
-                        ["Expenses", "", "", "", ""], 
-                        ["Amount Difference In Accounts", "", "", "", ""], 
-                        ["", "", "", "", ""], 
-                        ["Less:", "", "", "", ""], 
-                        ["Input invoices in accounts not in 2B", "", "", "", ""], 
-                        ["Input invoice Amended", "", "", "", ""], 
-                        ["", "", "", "", ""], 
-                        ["Input invoices as per calculation", "", "", "", ""], 
-                        ["Input invoices in 2B", "", "", "", ""], 
-                        ["Add: Expenses", "", "", "", ""], 
-                        ["Less: Credit notes in 2B", "", "", "", ""], 
-                        ["Less: RCM Expense", "", "", "", ""], 
-                        ["", "", "", "", ""], 
-                        ["Input invoices as per 2B", "", "", "", ""], 
-                        ["Difference", "", "", "", ""] 
-                    ];
-
-                    targetSheet.getRange("A1:E25").values = tableData;
-
-                    // Step 4: Inject Formulas
-                    let newFormulas = Array(25).fill("").map(() => Array(4).fill(""));
-                    
-                    for (let c = 0; c < 4; c++) {
-                        let colLetter = String.fromCharCode(66 + c); 
-                        
-                        // INJECT AUTO-LINKS IF FOUND
-                        if (nameBooks && bMap[c]) newFormulas[1][c] = `=SUM('${nameBooks}'!${bMap[c]}:${bMap[c]})`;
-                        if (name2B && tMap[c]) newFormulas[18][c] = `=SUM('${name2B}'!${tMap[c]}:${tMap[c]})`;
-
-                        // Built-in structural calculations
-                        newFormulas[5][c] = `=SUM(${colLetter}2:${colLetter}3)-${colLetter}4-${colLetter}5`;
-                        newFormulas[17][c] = `=${colLetter}6+SUM(${colLetter}9:${colLetter}12)-SUM(${colLetter}15:${colLetter}16)`;
-                        newFormulas[23][c] = `=${colLetter}19+${colLetter}20-${colLetter}21-${colLetter}22`;
-                        newFormulas[24][c] = `=${colLetter}18-${colLetter}24`;
-                    }
-                    
-                    targetSheet.getRange("B1:E25").formulas = newFormulas;
-
-                    // Step 5: Formatting
-                    targetSheet.getRange("A1:E1").format.font.bold = true;
-                    targetSheet.getRange("A1:E1").format.borders.getItem('EdgeBottom').style = 'Continuous';
-                    targetSheet.getRange("A6:E6").format.font.bold = true; 
-                    targetSheet.getRange("A18:E18").format.font.bold = true; 
-                    targetSheet.getRange("A24:E25").format.font.bold = true; 
-                    
-                    targetSheet.getRange("A6:E6").format.fill.color = "#f3f2f1";
-                    targetSheet.getRange("A18:E18").format.fill.color = "#f3f2f1";
-                    targetSheet.getRange("A24:E25").format.fill.color = "#f3f2f1";
-
-                    targetSheet.getRange("B2:E25").numberFormat = "_(* #,##0.00_);_(* (#,##0.00);_(* \"-\"??_);_(@_)";
-                    targetSheet.getRange("A:E").format.autofitColumns();
-                    targetSheet.activate();
-                    await context.sync();
-                    
-                    // Success Message indicating what was found
-                    let linkMsg = (name2B || nameBooks) ? ` Auto-linked ${nameBooks ? `'${nameBooks}'` : ""} ${name2B ? `& '${name2B}'` : ""}.` : " (No matching sheets found for auto-link).";
-                    showStatus("Template Deployed!" + linkMsg);
-                });
-            } catch (error) { 
-                if (error.message.includes("ItemAlreadyExists")) {
-                    showStatus("Error: Sheet exists. Rename and try again.", true);
-                } else {
-                    showStatus("Deployment Error: " + error.message, true); 
-                }
+        function toNum(v) {
+            if (typeof v === 'number') return isFinite(v) ? v : 0;
+            if (v === null || v === undefined) return 0;
+            let s = String(v).trim();
+            if (!s) return 0;
+            let neg = false;
+            if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+            const n = parseFloat(s.replace(/[^0-9.\-]/g, ''));
+            if (isNaN(n)) return 0;
+            return neg ? -Math.abs(n) : n;
+        }
+        function normDate(v) {
+            if (v === null || v === undefined || v === '') return '';
+            if (typeof v === 'number') {
+                if (v > 20000 && v < 80000) return new Date(Math.round((v - 25569) * 86400000)).toISOString().slice(0, 10);
+                return String(v);
             }
-        }
-
-        /* --- PIVOT --- */
-        let pivotRangeAddress = "";
-        async function loadPivotHeaders() {
-            if (!checkOffice()) return;
-            try {
-                await Excel.run(async (context) => {
-                    const range = context.workbook.getSelectedRange();
-                    range.load(["address", "values"]);
-                    await context.sync();
-                    
-                    if (!range.values || range.values.length === 0) {
-                        showStatus("Error: No data found in selection.", true);
-                        return;
-                    }
-                    
-                    pivotRangeAddress = range.address;
-                    const headers = range.values[0];
-                    const rowSelect = document.getElementById('pivot-row-select');
-                    const valSelect = document.getElementById('pivot-val-select');
-                    rowSelect.innerHTML = ""; valSelect.innerHTML = "";
-                    headers.forEach((h, i) => {
-                        let safeH = h || `Column ${i + 1}`;
-                        rowSelect.innerHTML += `<option value="${safeH}">${safeH}</option>`;
-                        valSelect.innerHTML += `<option value="${safeH}">${safeH}</option>`;
-                    });
-                    showStatus("Headers loaded!");
-                });
-            } catch (error) { showStatus("Header Load Error: " + error.message, true); }
-        }
-
-        async function executeDynamicPivot() {
-            if (!checkOffice()) return;
-            if (!pivotRangeAddress) { showStatus("Load headers first.", true); return; }
-            try {
-                await Excel.run(async (context) => {
-                    const rowField = document.getElementById('pivot-row-select').value;
-                    const valField = document.getElementById('pivot-val-select').value;
-                    const aggType = document.getElementById('pivot-agg-select').value;
-                    
-                    const activeSheet = context.workbook.worksheets.getActiveWorksheet();
-                    const sourceRange = activeSheet.getRange(pivotRangeAddress.split("!")[1]);
-                    const targetSheet = context.workbook.worksheets.add("Summary_" + Math.floor(Math.random()*10000));
-                    
-                    const pivotName = "Pivot_" + Math.floor(Math.random()*10000);
-                    const newPivot = targetSheet.pivotTables.add(pivotName, sourceRange, targetSheet.getRange("B3"));
-                    await context.sync();
-                    
-                    newPivot.rowHierarchies.add(newPivot.hierarchies.getItem(rowField));
-                    let dataHier = newPivot.dataHierarchies.add(newPivot.hierarchies.getItem(valField));
-                    
-                    if (aggType === "Sum") dataHier.summarizeBy = Excel.AggregationFunction.sum;
-                    if (aggType === "Count") dataHier.summarizeBy = Excel.AggregationFunction.count;
-                    if (aggType === "Average") dataHier.summarizeBy = Excel.AggregationFunction.average;
-                    
-                    targetSheet.activate();
-                    targetSheet.getRange("B:C").format.autofitColumns();
-                    await context.sync();
-                    showStatus("Summary generated.");
-                });
-            } catch (error) { showStatus("Pivot Error: " + error.message, true); }
-        }
-
-        /* --- RECONCILE --- */
-        let reconRangeA = null; let reconRangeB = null;
-        async function setReconRange(listId) {
-            if (!checkOffice()) return;
-            try {
-                await Excel.run(async (context) => {
-                    const range = context.workbook.getSelectedRange();
-                    const sheet = context.workbook.worksheets.getActiveWorksheet();
-                    
-                    range.load("address"); sheet.load("name");
-                    await context.sync();
-                    
-                    let data = { sheetName: sheet.name, address: range.address.split("!")[1] };
-                    if (listId === 'A') { reconRangeA = data; document.getElementById('range-a-display').value = `${sheet.name}!${data.address}`; }
-                    if (listId === 'B') { reconRangeB = data; document.getElementById('range-b-display').value = `${sheet.name}!${data.address}`; }
-                });
-            } catch (error) { showStatus("Set Range Error: " + error.message, true); }
-        }
-
-        async function executeReconciliation() {
-            if (!checkOffice()) return;
-            if (!reconRangeA || !reconRangeB) { showStatus("Set both Range A and Range B.", true); return; }
-            showStatus("Running reconciliation...");
-            try {
-                await Excel.run(async (context) => {
-                    const nameA = document.getElementById('name-a').value || "List A";
-                    const nameB = document.getElementById('name-b').value || "List B";
-                    let rawOutName = document.getElementById('recon-sheet-name').value || "Match_Report";
-                    let outName = rawOutName.replace(/[\\/*?:\[\]]/g, '').substring(0, 31);
-                    
-                    const sheetA = context.workbook.worksheets.getItem(reconRangeA.sheetName);
-                    const rangeA = sheetA.getRange(reconRangeA.address);
-                    rangeA.load("values");
-                    
-                    const sheetB = context.workbook.worksheets.getItem(reconRangeB.sheetName);
-                    const rangeB = sheetB.getRange(reconRangeB.address);
-                    rangeB.load("values");
-                    
-                    await context.sync();
-
-                    let listA = rangeA.values.map(r => String(r[0] || "")).filter(v => v.trim() !== "");
-                    let listB = rangeB.values.map(r => String(r[0] || "")).filter(v => v.trim() !== "");
-                    let cleanA = listA.map(v => v.trim().toLowerCase());
-                    let cleanB = listB.map(v => v.trim().toLowerCase());
-                    
-                    let report = [[`Item from ${nameA}`, `Status / Found in ${nameB}`]];
-
-                    function getLev(s1, s2) {
-                        let m = s1.length, n = s2.length;
-                        let d = Array.from({length: m+1}, () => Array(n+1).fill(0));
-                        for(let i=0; i<=m; i++) d[i][0] = i;
-                        for(let j=0; j<=n; j++) d[0][j] = j;
-                        for(let j=1; j<=n; j++) {
-                            for(let i=1; i<=m; i++) {
-                                let cost = (s1[i-1] === s2[j-1]) ? 0 : 1;
-                                d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + cost);
-                            }
-                        }
-                        return Math.max(m, n) === 0 ? 1 : 1 - (d[m][n] / Math.max(m, n));
-                    }
-
-                    for (let i = 0; i < listA.length; i++) {
-                        if (cleanB.includes(cleanA[i])) {
-                            report.push([listA[i], "✅ Exact Match"]);
-                        } else {
-                            let best = ""; let max = 0;
-                            for (let j = 0; j < listB.length; j++) {
-                                let score = getLev(cleanA[i], cleanB[j]);
-                                if (score > max) { max = score; best = listB[j]; }
-                            }
-                            if (max >= 0.8) report.push([listA[i], `⚠️ Fuzzy Match: ${best}`]);
-                            else report.push([listA[i], `❌ Missing in ${nameB}`]);
-                        }
-                    }
-                    for (let i = 0; i < listB.length; i++) {
-                        if (!cleanA.includes(cleanB[i])) report.push([`[${nameB}] ${listB[i]}`, `❌ Missing in ${nameA}`]);
-                    }
-
-                    const tSheet = context.workbook.worksheets.add(outName);
-                    const oRange = tSheet.getRangeByIndexes(1, 1, report.length, 2);
-                    oRange.values = report;
-                    tSheet.getRange("B2:C2").format.font.bold = true;
-                    oRange.format.autofitColumns();
-                    tSheet.activate();
-                    await context.sync();
-                    showStatus("Reconciliation complete.");
-                });
-            } catch (error) { 
-                if (error.message.includes("ItemAlreadyExists")) {
-                    showStatus("Sheet name already exists! Please change the Output Sheet Name and try again.", true);
-                } else {
-                    showStatus("Recon Engine Error: " + error.message, true); 
-                }
+            const s = String(v).trim();
+            let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+            if (m) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
+            m = s.match(/^(\d{1,2})[\/\- ]([A-Za-z]{3})[a-z]*[\/\- ,]*(\d{2,4})$/);
+            if (m) {
+                const mons = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+                const mi = mons.indexOf(m[2].toLowerCase());
+                if (mi >= 0) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; return `${y}-${String(mi + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
             }
+            m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+            return s.toLowerCase();
+        }
+        function lev(a, b) {
+            const m = a.length, n = b.length;
+            if (!m || !n) return m || n;
+            let prev = Array.from({ length: n + 1 }, (_, j) => j);
+            for (let i = 1; i <= m; i++) {
+                const cur = [i];
+                for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+                prev = cur;
+            }
+            return prev[n];
+        }
+        function sim(a, b) { if (a === b) return 1; const mx = Math.max(a.length, b.length); return mx ? 1 - lev(a, b) / mx : 1; }
+        function fillSelect(sel, items) {
+            sel.innerHTML = '';
+            items.forEach(it => { const o = document.createElement('option'); o.value = it.value; o.textContent = it.label; sel.appendChild(o); });
+        }
+        function readHeaders(values) {
+            const headers = values[0].map(v => String(v === null || v === undefined ? '' : v).trim());
+            const seen = new Set();
+            for (const h of headers) {
+                if (!h) return { error: 'Header row has a blank cell. Select only columns that have a header.' };
+                if (seen.has(h.toLowerCase())) return { error: `Duplicate header "${h}". Rename it first.` };
+                seen.add(h.toLowerCase());
+            }
+            return { headers };
         }
 
-        /* --- CLEANSE & FONT --- */
+        /* ---------- CLEANSE & FONT (unchanged) ---------- */
         async function executeDataCleaning() {
             if (!checkOffice()) return;
             try {
@@ -1187,7 +510,7 @@
                     const casing = document.getElementById('clean-case').value;
                     const doTrim = document.getElementById('clean-trim').checked;
                     const doAcct = document.getElementById('clean-accounting').checked;
-                    
+
                     for (let r = 0; r < values.length; r++) {
                         for (let c = 0; c < values[0].length; c++) {
                             let val = values[r][c];
@@ -1220,7 +543,7 @@
             try {
                 await Excel.run(async (context) => {
                     const sheet = context.workbook.worksheets.getActiveWorksheet();
-                    const range = sheet.getUsedRange(); 
+                    const range = sheet.getUsedRange();
                     const fontName = document.getElementById('sheet-font').value;
                     range.format.font.name = fontName;
                     await context.sync();
@@ -1229,158 +552,857 @@
             } catch (error) { showStatus("Font Error: " + error.message, true); }
         }
 
-        /* --- REPORT FORMATTING (VBA PORT) --- */
-        async function executeReportFormatting() {
+        /* ---------- GST: REPORT PREP ---------- */
+        async function loadPrepSheets() {
             if (!checkOffice()) return;
-            showStatus("Formatting report layout...");
             try {
-                await Excel.run(async (context) => {
-                    const sheet = context.workbook.worksheets.getActiveWorksheet();
-                    
-                    // 1. Delete rows 1:4 (shifting remaining rows up)
-                    sheet.getRange("1:4").delete(Excel.DeleteShiftDirection.up);
-                    
-                    // 2. Format row 1 and row 2 (which are now headers)
-                    const rows1_2 = sheet.getRange("1:2");
-                    rows1_2.format.verticalAlignment = Excel.VerticalAlignment.center;
-                    rows1_2.format.wrapText = true;
-                    rows1_2.unmerge();
-                    
-                    // 3. Copy headers/formulas from row 1 down to row 2 for specified columns
-                    sheet.getRange("A2:B2").copyFrom(sheet.getRange("A1:B1"));
-                    sheet.getRange("G2:I2").copyFrom(sheet.getRange("G1:I1"));
-                    sheet.getRange("N2:U2").copyFrom(sheet.getRange("N1:U1"));
-                    
-                    // Sync to guarantee copying is done before deletion
-                    await context.sync();
-                    
-                    // 4. Delete row 1 (shifting filled row 2 up to row 1)
-                    sheet.getRange("1:1").delete(Excel.DeleteShiftDirection.up);
-                    await context.sync();
-                    
-                    // 5. Select the contiguous data block from A1
-                    const dataRange = sheet.getRange("A1").getSurroundingRegion();
-                    
-                    // 6. Apply AutoFilter
-                    sheet.autoFilter.apply(dataRange);
-                    
-                    // 7. Un-wrap text on the entire block
-                    dataRange.format.wrapText = false;
-                    
-                    // 8. Focus/select C12
-                    sheet.getRange("C12").select();
-                    
-                    await context.sync();
-                    showStatus("Report prepared and AutoFiltered successfully!");
+                await Excel.run(async (ctx) => {
+                    const sheets = ctx.workbook.worksheets;
+                    sheets.load('items/name');
+                    await ctx.sync();
+                    const box = document.getElementById('prep-sheets');
+                    box.innerHTML = '';
+                    sheets.items.forEach(s => {
+                        const lab = document.createElement('label');
+                        lab.className = 'checkbox-item';
+                        lab.style.textTransform = 'none';
+                        lab.style.letterSpacing = '0';
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox'; cb.value = s.name;
+                        const sp = document.createElement('span');
+                        sp.textContent = s.name;
+                        lab.appendChild(cb); lab.appendChild(sp);
+                        box.appendChild(lab);
+                    });
+                    showStatus(`${sheets.items.length} sheets loaded. Tick the ones to format.`);
                 });
-            } catch (error) {
-                showStatus("Formatting Error: " + error.message, true);
-            }
+            } catch (e) { showStatus("Load Sheets Error: " + e.message, true); }
         }
 
-        /* --- DATA MASKING (ANONYMIZER) --- */
+        async function executeReportFormatting() {
+            if (!checkOffice()) return;
+            const picked = Array.from(document.querySelectorAll('#prep-sheets input:checked')).map(c => c.value);
+            if (!picked.length) { showStatus("Load sheets and tick at least one.", true); return; }
+            const nDel = Math.max(0, parseInt(document.getElementById('prep-rows').value) || 0);
+            showStatus("Formatting report layout...");
+            const done = [], skipped = [], failed = [];
+            for (const name of picked) {
+                try {
+                    await Excel.run(async (ctx) => {
+                        const sh = ctx.workbook.worksheets.getItem(name);
+                        sh.autoFilter.load('enabled');
+                        await ctx.sync();
+                        if (sh.autoFilter.enabled) { skipped.push(name); return; }
+
+                        if (nDel > 0) { sh.getRange(`1:${nDel}`).delete(Excel.DeleteShiftDirection.up); await ctx.sync(); }
+
+                        const ur = sh.getUsedRange(true);
+                        ur.load(['columnCount', 'columnIndex']);
+                        await ctx.sync();
+                        const cols = ur.columnIndex + ur.columnCount;
+
+                        // Unmerge the two header rows and collapse them into one:
+                        // lower row wins, upper row fills where lower is blank (vertical merges).
+                        const h = sh.getRangeByIndexes(0, 0, 2, cols);
+                        h.unmerge();
+                        h.load('values');
+                        await ctx.sync();
+                        const r1 = h.values[0], r2 = h.values[1];
+                        const merged = r2.map((v, i) => (v === '' || v === null) ? r1[i] : v);
+                        sh.getRangeByIndexes(1, 0, 1, cols).values = [merged];
+                        await ctx.sync();
+
+                        sh.getRange('1:1').delete(Excel.DeleteShiftDirection.up);
+                        await ctx.sync();
+
+                        const data = sh.getRange('A1').getSurroundingRegion();
+                        data.format.wrapText = false;
+                        sh.autoFilter.apply(data);
+                        sh.freezePanes.freezeRows(1);
+                        data.format.autofitColumns();
+                        await ctx.sync();
+                        done.push(name);
+                    });
+                } catch (e) { failed.push(`${name} (${e.message})`); }
+            }
+            let msg = `Formatted: ${done.length}.`;
+            if (skipped.length) msg += ` Skipped (filter already on): ${skipped.join(', ')}.`;
+            if (failed.length) msg += ` Failed: ${failed.join('; ')}.`;
+            showStatus(msg, failed.length > 0 && done.length === 0);
+        }
+
+        /* ---------- GST: DETECTION ---------- */
+        const GST_FIELDS = ['gstin', 'name', 'inv', 'date', 'taxable', 'cgst', 'sgst', 'igst', 'rcm'];
+        const FIELD_LABEL = { gstin: 'GSTIN', name: 'Party name', inv: 'Invoice no', date: 'Invoice date', taxable: 'Taxable value', cgst: 'CGST', sgst: 'SGST', igst: 'IGST', rcm: 'Reverse charge (Y/N)' };
+        const GST_RULES = {
+            gstin: n => (/gstin|gstno|gstnumber|^uin$/.test(n) && !/recipient|receiver|buyer|customer/.test(n)) ? (/supplier|party|vendor/.test(n) ? 2 : 1) : 0,
+            name: n => (/^(tradelegalname|tradename|legalname|suppliername|nameofsupplier|partyname|vendorname|nameofparty|vendor|supplier|party|particulars|ledgername|name)$/.test(n) || /tradelegal/.test(n)) ? 1 : 0,
+            inv: n => (/(invoice|inv|bill|document|doc|voucher|vch)(number|no|num|nos)$/.test(n) && !/date|value|type|amount/.test(n)) ? 1 : 0,
+            date: n => (/date$/.test(n) && !/period|filing|return|upload|effective|due|entry|received/.test(n)) ? (/^(invoice|inv|bill|document)/.test(n) ? 2 : 1) : 0,
+            taxable: n => /taxable/.test(n) ? 1 : 0,
+            cgst: n => /^(cgst|centraltax)/.test(n) ? 1 : 0,
+            sgst: n => /^(sgst|utgst|stateuttax|statetax|sgstutgst)/.test(n) ? 1 : 0,
+            igst: n => /^(igst|integratedtax)/.test(n) ? 1 : 0,
+            rcm: n => /reversecharge|^rcm/.test(n) ? 1 : 0
+        };
+        const GST_ROLES = [
+            { key: 'b2b', label: '2B: B2B sheet' },
+            { key: 'cdnr', label: '2B: CDNR (credit/debit notes) sheet' },
+            { key: 'purchase', label: 'Books: Purchase sheet' },
+            { key: 'expense', label: 'Books: Expense sheet' },
+            { key: 'cn', label: 'Books: Credit Note sheet' },
+            { key: 'rcm', label: 'Books: RCM sheet' }
+        ];
+        let gstScanned = false;
+
+        function guessRole(names, key) {
+            const n = names.map(s => ({ s, l: s.toLowerCase().replace(/[^a-z0-9]/g, '') }));
+            const find = f => { const h = n.find(x => f(x.l)); return h ? h.s : ''; };
+            switch (key) {
+                case 'b2b': return find(l => /b2b/.test(l) && !/b2ba/.test(l) && !/cdn/.test(l)) || find(l => /2b/.test(l) && !/cdn|ba$/.test(l) && !/purchase|book|account/.test(l));
+                case 'cdnr': return find(l => /cdn/.test(l) && !/cdnra/.test(l));
+                case 'purchase': return find(l => /purchase/.test(l) && !/2b/.test(l)) || find(l => /book|account/.test(l) && !/2b/.test(l));
+                case 'expense': return find(l => /expense/.test(l));
+                case 'cn': return find(l => /(creditnote|debitnote|^cn$|^dn$|purchasereturn)/.test(l) && !/cdn|2b/.test(l));
+                case 'rcm': return find(l => /rcm|reversecharge/.test(l));
+            }
+            return '';
+        }
+
+        async function readGrid(ctx, sheetName) {
+            const ur = ctx.workbook.worksheets.getItem(sheetName).getUsedRange(true);
+            ur.load(['values', 'rowIndex', 'columnIndex']);
+            await ctx.sync();
+            return { values: ur.values, rowIndex: ur.rowIndex, columnIndex: ur.columnIndex };
+        }
+
+        function detectCols(values) {
+            const cols = {}; const score = {};
+            let hdrRow = -1;
+            const maxScan = Math.min(12, values.length);
+            for (let r = 0; r < maxScan; r++) {
+                for (let c = 0; c < values[r].length; c++) {
+                    const n = String(values[r][c] === null || values[r][c] === undefined ? '' : values[r][c]).toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (!n) continue;
+                    for (const f of GST_FIELDS) {
+                        const sc = GST_RULES[f](n);
+                        if (sc > 0 && (score[f] === undefined || sc > score[f])) { score[f] = sc; cols[f] = c; if (r > hdrRow) hdrRow = r; }
+                    }
+                }
+            }
+            // header row = lowest row that holds a detected header (fixes two-row headers)
+            hdrRow = -1;
+            for (const f of Object.keys(cols)) {
+                for (let r = 0; r < maxScan; r++) {
+                    const n = String(values[r][cols[f]] === null || values[r][cols[f]] === undefined ? '' : values[r][cols[f]]).toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (n && GST_RULES[f](n) === score[f]) { if (r > hdrRow) hdrRow = r; break; }
+                }
+            }
+            return { cols, hdrRow: hdrRow < 0 ? 0 : hdrRow };
+        }
+
+        function extractRows(values, cols, hdrRow, rowIndex, sheetName) {
+            const out = [];
+            const get = (row, f) => cols[f] === undefined || cols[f] === null ? '' : row[cols[f]];
+            for (let i = hdrRow + 1; i < values.length; i++) {
+                const row = values[i];
+                if (row.every(v => v === '' || v === null)) continue;
+                if (row.some(v => typeof v === 'string' && /^\s*(grand\s*|sub\s*)?total/i.test(v))) continue;
+                const o = {
+                    sheet: sheetName, row: rowIndex + i + 1,
+                    date: normDate(get(row, 'date')),
+                    gstin: String(get(row, 'gstin') || '').trim().toUpperCase(),
+                    name: String(get(row, 'name') || '').trim(),
+                    inv: String(get(row, 'inv') || '').trim(),
+                    taxable: toNum(get(row, 'taxable')),
+                    cgst: toNum(get(row, 'cgst')), sgst: toNum(get(row, 'sgst')), igst: toNum(get(row, 'igst')),
+                    rcm: cols.rcm !== undefined && cols.rcm !== null ? /^(y|yes|true)$/i.test(String(row[cols.rcm]).trim()) : false
+                };
+                o.gst = o.cgst + o.sgst + o.igst;
+                if ((cols.inv !== undefined || cols.gstin !== undefined) && !o.inv && !o.gstin && !o.name) continue;
+                if (!o.taxable && !o.gst && !o.inv) continue;
+                o.nk = o.name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\b(pvt|private|ltd|limited|llp|co|company|inc|the|and|ms)\b/g, ' ').replace(/\s+/g, '');
+                o.ia = o.inv.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                o.iz = o.ia.replace(/(^|[^0-9])0+(?=\d)/g, '$1');
+                out.push(o);
+            }
+            return out;
+        }
+
+        function sumRows(rows, absolute) {
+            const t = rows.reduce((a, r) => ({ t: a.t + r.taxable, c: a.c + r.cgst, s: a.s + r.sgst, i: a.i + r.igst }), { t: 0, c: 0, s: 0, i: 0 });
+            if (absolute) { t.t = Math.abs(t.t); t.c = Math.abs(t.c); t.s = Math.abs(t.s); t.i = Math.abs(t.i); }
+            return t;
+        }
+
+        async function scanGSTWorkbook() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const sheets = ctx.workbook.worksheets;
+                    sheets.load('items/name');
+                    await ctx.sync();
+                    const names = sheets.items.map(s => s.name);
+                    const box = document.getElementById('gst-roles');
+                    box.innerHTML = '';
+                    GST_ROLES.forEach(role => {
+                        const g = document.createElement('div');
+                        g.className = 'form-group';
+                        const l = document.createElement('label');
+                        l.textContent = role.label;
+                        const sel = document.createElement('select');
+                        sel.id = 'role-' + role.key;
+                        fillSelect(sel, [{ value: '', label: '(none)' }].concat(names.map(n => ({ value: n, label: n }))));
+                        sel.value = guessRole(names, role.key);
+                        if (role.key === 'b2b' || role.key === 'purchase') sel.onchange = () => refreshMap(role.key);
+                        g.appendChild(l); g.appendChild(sel);
+                        box.appendChild(g);
+                    });
+                });
+                document.getElementById('gst-map').innerHTML = '';
+                await refreshMap('b2b');
+                await refreshMap('purchase');
+                gstScanned = true;
+                showStatus("Scan done. Check sheets and column mapping, then build.");
+            } catch (e) { showStatus("Scan Error: " + e.message, true); }
+        }
+
+        async function refreshMap(key) {
+            const sheetName = document.getElementById('role-' + key).value;
+            const holder = document.getElementById('gst-map');
+            const old = document.getElementById('mapblock-' + key);
+            if (old) old.remove();
+            if (!sheetName) return;
+            await Excel.run(async (ctx) => {
+                const grid = await readGrid(ctx, sheetName);
+                const det = detectCols(grid.values);
+                const block = document.createElement('div');
+                block.className = 'map-block';
+                block.id = 'mapblock-' + key;
+                const h3 = document.createElement('h3');
+                h3.textContent = (key === 'b2b' ? '2B B2B' : 'Books Purchase') + ' - ' + sheetName;
+                block.appendChild(h3);
+                const opts = [{ value: '', label: '(not found)' }];
+                const width = Math.max(...grid.values.slice(0, det.hdrRow + 1).map(r => r.length));
+                for (let c = 0; c < width; c++) {
+                    let txt = '';
+                    for (let r = 0; r <= det.hdrRow; r++) { const v = grid.values[r][c]; if (v !== '' && v !== null && v !== undefined) txt = String(v); }
+                    if (txt) opts.push({ value: String(c), label: `${colLetter(grid.columnIndex + c)}: ${txt}` });
+                }
+                GST_FIELDS.forEach(f => {
+                    if (f === 'rcm' && key !== 'b2b') return;
+                    const g = document.createElement('div');
+                    g.className = 'form-group';
+                    const l = document.createElement('label');
+                    l.textContent = FIELD_LABEL[f];
+                    const sel = document.createElement('select');
+                    sel.id = `map-${key}-${f}`;
+                    fillSelect(sel, opts);
+                    sel.value = det.cols[f] !== undefined ? String(det.cols[f]) : '';
+                    g.appendChild(l); g.appendChild(sel);
+                    block.appendChild(g);
+                });
+                holder.appendChild(block);
+            });
+        }
+
+        async function buildGST() {
+            if (!checkOffice()) return;
+            if (!gstScanned) { showStatus("Click Scan Workbook first.", true); return; }
+            const role = k => { const el = document.getElementById('role-' + k); return el ? el.value : ''; };
+            if (!role('b2b') || !role('purchase')) { showStatus("Pick the 2B B2B sheet and the Books Purchase sheet.", true); return; }
+            let tol = parseFloat(document.getElementById('gst-tol').value);
+            if (isNaN(tol) || tol < 0) tol = 1;
+            const outBase = safeSheetName(document.getElementById('gst-sheet-name').value || 'GST_Reconciliation');
+            const matchName = safeSheetName(outBase.substring(0, 25) + '_Match');
+            showStatus("Reading sheets and matching invoices...");
+            try {
+                await Excel.run(async (ctx) => {
+                    if (await sheetExists(ctx, outBase) || await sheetExists(ctx, matchName)) {
+                        showStatus(`Sheet "${outBase}" or "${matchName}" already exists. Change the output name.`, true);
+                        return;
+                    }
+
+                    // ---- read + extract
+                    const data = {};
+                    for (const r of GST_ROLES) {
+                        const sn = role(r.key);
+                        if (!sn) { data[r.key] = []; continue; }
+                        const grid = await readGrid(ctx, sn);
+                        const det = detectCols(grid.values);
+                        if (r.key === 'b2b' || r.key === 'purchase') {
+                            GST_FIELDS.forEach(f => {
+                                const el = document.getElementById(`map-${r.key}-${f}`);
+                                if (!el) return;
+                                if (el.value === '') delete det.cols[f]; else det.cols[f] = parseInt(el.value);
+                            });
+                        }
+                        data[r.key] = extractRows(grid.values, det.cols, det.hdrRow, grid.rowIndex, sn);
+                    }
+                    const A = data.b2b;
+                    const B = data.purchase.concat(data.expense);
+
+                    // ---- Tier 1: exact keys (date, gstin, name, invoice) + amounts within tolerance
+                    const keyOf = o => [o.date, o.gstin, o.nk, o.ia].join('|');
+                    const bMap = new Map();
+                    B.forEach((b, bi) => { const k = keyOf(b); if (!bMap.has(k)) bMap.set(k, []); bMap.get(k).push(bi); });
+                    const usedB = new Set();
+                    const matched = [];
+                    const restA = [];
+                    A.forEach(a => {
+                        const cand = bMap.get(keyOf(a)) || [];
+                        let hit = -1;
+                        for (const bi of cand) {
+                            if (usedB.has(bi)) continue;
+                            const b = B[bi];
+                            if (Math.abs(a.taxable - b.taxable) <= tol && Math.abs(a.gst - b.gst) <= tol) { hit = bi; break; }
+                        }
+                        if (hit >= 0) { usedB.add(hit); matched.push({ a, b: B[hit], type: 'Tier 1 - Exact' }); }
+                        else restA.push(a);
+                    });
+
+                    // ---- Tier 2: same date, fuzzy invoice + fuzzy name, taxable within tolerance
+                    const bucket = new Map();
+                    B.forEach((b, bi) => { if (usedB.has(bi)) return; if (!bucket.has(b.date)) bucket.set(b.date, []); bucket.get(b.date).push(bi); });
+                    const only2B = [];
+                    restA.forEach(a => {
+                        const cand = bucket.get(a.date) || [];
+                        let best = -1, bestSc = 0;
+                        for (const bi of cand) {
+                            if (usedB.has(bi)) continue;
+                            const b = B[bi];
+                            if (Math.abs(a.taxable - b.taxable) > tol) continue;
+                            const ns = sim(a.nk, b.nk); if (ns < 0.75) continue;
+                            const is = sim(a.iz, b.iz); if (is < 0.8) continue;
+                            if (is + ns > bestSc) { bestSc = is + ns; best = bi; }
+                        }
+                        if (best >= 0) { usedB.add(best); matched.push({ a, b: B[best], type: 'Tier 2 - Fuzzy' }); }
+                        else only2B.push(a);
+                    });
+                    const onlyBooks = B.filter((b, bi) => !usedB.has(bi));
+
+                    // ---- match sheet
+                    const ms = ctx.workbook.worksheets.add(matchName);
+                    let r = 0;
+                    const ACC = '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)';
+                    const writeSec = (title, headers, rows, fill, amtFrom, amtTo) => {
+                        const w = headers.length;
+                        const tr = ms.getRangeByIndexes(r, 0, 1, w);
+                        tr.format.fill.color = fill; tr.format.font.bold = true;
+                        ms.getRangeByIndexes(r, 0, 1, 1).values = [[`${title} (${rows.length})`]];
+                        r++;
+                        const hr = ms.getRangeByIndexes(r, 0, 1, w);
+                        hr.values = [headers]; hr.format.font.bold = true; hr.format.fill.color = '#e5e7eb'; hr.format.font.color = '#111827';
+                        r++;
+                        if (rows.length) ms.getRangeByIndexes(r, 0, rows.length, w).values = rows;
+                        const first = r + 1, last = r + rows.length;
+                        r += rows.length;
+                        const tot = Array(w).fill('');
+                        tot[0] = 'Total';
+                        for (let ci = amtFrom; ci <= amtTo; ci++) tot[ci] = rows.length ? `=SUM(${colLetter(ci)}${first}:${colLetter(ci)}${last})` : 0;
+                        const totR = ms.getRangeByIndexes(r, 0, 1, w);
+                        totR.formulas = [tot]; totR.format.font.bold = true;
+                        totR.format.borders.getItem('EdgeTop').style = 'Continuous';
+                        ms.getRangeByIndexes(hr.address ? r - rows.length - 1 : 0, amtFrom, rows.length + 2, amtTo - amtFrom + 1).numberFormat = Array(rows.length + 2).fill(Array(amtTo - amtFrom + 1).fill(ACC));
+                        const totalRow1 = r + 1;
+                        r += 3;
+                        return totalRow1;
+                    };
+
+                    const mHead = ['Match Type', 'Date', 'GSTIN', 'Name', 'Invoice (2B)', 'Invoice (Books)', 'Taxable 2B', 'Taxable Books', 'CGST 2B', 'CGST Books', 'SGST 2B', 'SGST Books', 'IGST 2B', 'IGST Books', 'Diff Taxable', 'Diff CGST', 'Diff SGST', 'Diff IGST'];
+                    const mRows = matched.map(m => [m.type, m.a.date, m.a.gstin, m.a.name, m.a.inv, m.b.inv, m.a.taxable, m.b.taxable, m.a.cgst, m.b.cgst, m.a.sgst, m.b.sgst, m.a.igst, m.b.igst,
+                        m.a.taxable - m.b.taxable, m.a.cgst - m.b.cgst, m.a.sgst - m.b.sgst, m.a.igst - m.b.igst]);
+                    const uHead = ['Date', 'GSTIN', 'Name', 'Invoice No', 'Taxable', 'CGST', 'SGST', 'IGST', 'Sheet', 'Row'];
+                    const uRow = o => [o.date, o.gstin, o.name, o.inv, o.taxable, o.cgst, o.sgst, o.igst, o.sheet, o.row];
+
+                    const rowM = writeSec('Matched', mHead, mRows, '#bbf7d0', 6, 17);
+                    const rowU2 = writeSec('In 2B, not in Books', uHead, only2B.map(uRow), '#fde68a', 4, 7);
+                    const rowU3 = writeSec('In Books, not in 2B', uHead, onlyBooks.map(uRow), '#fecaca', 4, 7);
+                    ms.getRange('A:R').format.autofitColumns();
+
+                    // ---- summary sheet
+                    const ss = ctx.workbook.worksheets.add(outBase);
+                    const labels = [
+                        ['PARTICULARS', 'Taxable Value', 'CGST', 'SGST', 'IGST'],
+                        ['Input invoices as per accounts (Purchase)'], ['Input invoices as per accounts (Expense)'], ['Less: Credit note as per accounts'], ['Less: RCM Expenses'], ['Net input as per accounts'], [''],
+                        ['Add:'], ['Input invoices in 2B not in accounts'], ['Reverse Charge'], ['Expenses'], ['Amount Difference In Accounts'], [''],
+                        ['Less:'], ['Input invoices in accounts not in 2B'], ['Input invoice Amended'], [''],
+                        ['Input invoices as per calculation'], ['Input invoices in 2B'], ['Add: Expenses'], ['Less: Credit notes in 2B'], ['Less: RCM Expense'], [''],
+                        ['Input invoices as per 2B'], ['Difference']
+                    ];
+                    ss.getRange('A1:A25').values = labels.map(x => [x[0]]);
+                    ss.getRange('B1:E1').values = [labels[0].slice(1)];
+                    ss.getRange('F1').values = [['Source / note']];
+
+                    const S = Array.from({ length: 25 }, () => ['', '', '', '']);
+                    const notes = Array(25).fill('');
+                    const put = (row, t, note) => { S[row - 1] = [t.t, t.c, t.s, t.i]; notes[row - 1] = note; };
+                    if (role('purchase')) put(2, sumRows(data.purchase, false), 'Books: ' + role('purchase'));
+                    if (role('expense')) put(3, sumRows(data.expense, false), 'Books: ' + role('expense'));
+                    if (role('cn')) put(4, sumRows(data.cn, true), 'Books: ' + role('cn'));
+                    if (role('rcm')) put(5, sumRows(data.rcm, true), 'Books: ' + role('rcm'));
+                    put(19, sumRows(data.b2b, false), '2B: ' + role('b2b'));
+                    if (role('cdnr')) put(21, sumRows(data.cdnr, true), '2B: ' + role('cdnr'));
+                    put(22, sumRows(data.b2b.filter(x => x.rcm), true), '2B rows flagged Reverse Charge = Y');
+                    const MS = qs(matchName);
+                    const U = ['E', 'F', 'G', 'H'], D = ['O', 'P', 'Q', 'R'];
+                    for (let c = 0; c < 4; c++) {
+                        const L = String.fromCharCode(66 + c);
+                        S[5][c] = `=SUM(${L}2:${L}3)-${L}4-${L}5`;
+                        S[8][c] = `=${MS}!${U[c]}${rowU2}`;
+                        S[11][c] = `=${MS}!${D[c]}${rowM}`;
+                        S[14][c] = `=${MS}!${U[c]}${rowU3}`;
+                        S[17][c] = `=${L}6+SUM(${L}9:${L}12)-SUM(${L}15:${L}16)`;
+                        S[23][c] = `=${L}19+${L}20-${L}21-${L}22`;
+                        S[24][c] = `=${L}18-${L}24`;
+                    }
+                    notes[8] = 'Match sheet: In 2B, not in Books';
+                    notes[11] = 'Match sheet: 2B minus Books on matched invoices';
+                    notes[14] = 'Match sheet: In Books, not in 2B';
+                    ss.getRange('B2:E25').formulas = S.slice(1);
+                    ss.getRange('F2:F25').values = notes.slice(1).map(x => [x]);
+
+                    ss.getRange('A1:F1').format.font.bold = true;
+                    ss.getRange('A1:F1').format.borders.getItem('EdgeBottom').style = 'Continuous';
+                    [6, 18, 24, 25].forEach(n => { const rg = ss.getRange(`A${n}:E${n}`); rg.format.font.bold = true; rg.format.fill.color = '#f3f2f1'; rg.format.font.color = '#111827'; });
+                    ss.getRange('B2:E25').numberFormat = Array(24).fill(Array(4).fill(ACC));
+                    ss.getRange('A:F').format.autofitColumns();
+                    ss.activate();
+                    await ctx.sync();
+                    const t1 = matched.filter(m => m.type.startsWith('Tier 1')).length;
+                    showStatus(`Done. Matched ${matched.length} (Tier 1: ${t1}, Tier 2: ${matched.length - t1}). In 2B only: ${only2B.length}. In Books only: ${onlyBooks.length}.`);
+                });
+            } catch (e) { showStatus("GST Build Error: " + e.message, true); }
+        }
+
+        /* ---------- PIVOT ---------- */
+        let pivotSrc = null;
+        async function loadPivotHeaders() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const range = ctx.workbook.getSelectedRange();
+                    range.load(['address', 'values', 'rowCount']);
+                    range.worksheet.load('name');
+                    await ctx.sync();
+                    if (range.rowCount < 2) { showStatus("Select the header row plus at least one data row.", true); return; }
+                    const res = readHeaders(range.values);
+                    if (res.error) { showStatus(res.error, true); return; }
+                    pivotSrc = { sheet: range.worksheet.name, address: range.address.split('!').pop() };
+                    const items = res.headers.map(h => ({ value: h, label: h }));
+                    fillSelect(document.getElementById('pivot-row-select'), items);
+                    fillSelect(document.getElementById('pivot-val-select'), items);
+                    showStatus(`Headers loaded from ${pivotSrc.sheet}!${pivotSrc.address}`);
+                });
+            } catch (e) { showStatus("Header Load Error: " + e.message, true); }
+        }
+
+        async function executeDynamicPivot() {
+            if (!checkOffice()) return;
+            if (!pivotSrc) { showStatus("Load headers first.", true); return; }
+            try {
+                await Excel.run(async (ctx) => {
+                    const rowField = document.getElementById('pivot-row-select').value;
+                    const valField = document.getElementById('pivot-val-select').value;
+                    const aggType = document.getElementById('pivot-agg-select').value;
+                    const source = ctx.workbook.worksheets.getItem(pivotSrc.sheet).getRange(pivotSrc.address);
+                    const target = ctx.workbook.worksheets.add(await uniqueSheetName(ctx, 'Pivot_Summary'));
+                    const pivot = target.pivotTables.add('Pivot_' + Date.now().toString().slice(-6), source, target.getRange('B3'));
+                    await ctx.sync();
+                    pivot.rowHierarchies.add(pivot.hierarchies.getItem(rowField));
+                    const dh = pivot.dataHierarchies.add(pivot.hierarchies.getItem(valField));
+                    if (aggType === 'Sum') dh.summarizeBy = Excel.AggregationFunction.sum;
+                    if (aggType === 'Count') dh.summarizeBy = Excel.AggregationFunction.count;
+                    if (aggType === 'Average') dh.summarizeBy = Excel.AggregationFunction.average;
+                    target.activate();
+                    target.getRange('B:C').format.autofitColumns();
+                    await ctx.sync();
+                    showStatus("Summary generated.");
+                });
+            } catch (e) { showStatus("Pivot Error: " + e.message, true); }
+        }
+
+        /* ---------- TOOLS: AMOUNT TO WORDS ---------- */
+        const ONES = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        function b100(n) { return n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? ' ' + ONES[n % 10] : ''); }
+        function b1000(n) { const h = Math.floor(n / 100), r = n % 100; return (h ? ONES[h] + ' Hundred' + (r ? ' ' : '') : '') + (r ? b100(r) : ''); }
+        function inWords(n) {
+            if (n === 0) return 'Zero';
+            const parts = [];
+            const cr = Math.floor(n / 1e7); n %= 1e7;
+            const lk = Math.floor(n / 1e5); n %= 1e5;
+            const th = Math.floor(n / 1e3); n %= 1e3;
+            if (cr) parts.push((cr < 1000 ? b1000(cr) : inWords(cr)) + ' Crore');
+            if (lk) parts.push(b100(lk) + ' Lakh');
+            if (th) parts.push(b100(th) + ' Thousand');
+            if (n) parts.push(b1000(n));
+            return parts.join(' ');
+        }
+        function amountWords(val, prefix, suffix) {
+            let n = typeof val === 'number' ? val : (String(val).trim() === '' ? NaN : toNum(val));
+            if (typeof val === 'string' && !/\d/.test(val)) n = NaN;
+            if (isNaN(n)) return '';
+            const neg = n < 0;
+            const total = Math.round(Math.abs(n) * 100);
+            const rupees = Math.floor(total / 100), paise = total % 100;
+            let s = (prefix ? prefix + ' ' : '') + inWords(rupees);
+            if (paise) s += ' and ' + inWords(paise) + ' Paise';
+            if (suffix) s += ' ' + suffix;
+            return (neg ? 'Minus ' : '') + s;
+        }
+
+        async function executeAmountToWords() {
+            if (!checkOffice()) return;
+            const col = (document.getElementById('atw-col').value || '').trim().toUpperCase();
+            if (!/^[A-Z]{1,3}$/.test(col)) { showStatus("Type an output column letter, e.g. F.", true); return; }
+            const prefix = document.getElementById('atw-prefix').value.trim();
+            const suffix = document.getElementById('atw-suffix').value.trim();
+            try {
+                await Excel.run(async (ctx) => {
+                    const sel = ctx.workbook.getSelectedRange();
+                    sel.load(['values', 'rowIndex', 'rowCount']);
+                    const sheet = ctx.workbook.worksheets.getActiveWorksheet();
+                    await ctx.sync();
+                    const target = sheet.getRangeByIndexes(sel.rowIndex, colIndex(col), sel.rowCount, 1);
+                    target.load('values');
+                    await ctx.sync();
+                    const filled = target.values.filter(r => r[0] !== '' && r[0] !== null).length;
+                    if (filled) { showStatus(`Column ${col} has ${filled} non-empty cell(s) in these rows. Pick an empty column.`, true); return; }
+                    let n = 0;
+                    const out = sel.values.map(row => {
+                        const v = row.find(x => x !== '' && x !== null && typeof x !== 'boolean' && /\d/.test(String(x)));
+                        if (v === undefined) return [''];
+                        n++;
+                        return [amountWords(v, prefix, suffix)];
+                    });
+                    target.values = out;
+                    target.format.autofitColumns();
+                    await ctx.sync();
+                    showStatus(`Converted ${n} amount(s) into column ${col}.`);
+                });
+            } catch (e) { showStatus("Amount to Words Error: " + e.message, true); }
+        }
+
+        /* ---------- TOOLS: SPLIT BY COLUMN ---------- */
+        let splitSrc = null;
+        async function loadSplitHeaders() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const range = ctx.workbook.getSelectedRange();
+                    range.load(['address', 'values', 'rowCount']);
+                    range.worksheet.load('name');
+                    await ctx.sync();
+                    if (range.rowCount < 2) { showStatus("Select the header row plus at least one data row.", true); return; }
+                    const res = readHeaders(range.values);
+                    if (res.error) { showStatus(res.error, true); return; }
+                    splitSrc = { sheet: range.worksheet.name, address: range.address.split('!').pop() };
+                    fillSelect(document.getElementById('split-col-select'), res.headers.map((h, i) => ({ value: String(i), label: h })));
+                    showStatus(`Headers loaded from ${splitSrc.sheet}!${splitSrc.address}`);
+                });
+            } catch (e) { showStatus("Header Load Error: " + e.message, true); }
+        }
+
+        async function executeSplit() {
+            if (!checkOffice()) return;
+            if (!splitSrc) { showStatus("Load headers first.", true); return; }
+            const ci = parseInt(document.getElementById('split-col-select').value);
+            try {
+                await Excel.run(async (ctx) => {
+                    const src = ctx.workbook.worksheets.getItem(splitSrc.sheet).getRange(splitSrc.address);
+                    src.load(['values', 'numberFormat']);
+                    await ctx.sync();
+                    const header = src.values[0];
+                    const groups = new Map();
+                    for (let i = 1; i < src.values.length; i++) {
+                        const raw = src.values[i][ci];
+                        const key = (raw === '' || raw === null) ? '(Blank)' : String(raw).trim();
+                        if (!groups.has(key)) groups.set(key, []);
+                        groups.get(key).push(i);
+                    }
+                    if (groups.size > 100) { showStatus(`Column has ${groups.size} unique values (max 100). Pick another column.`, true); return; }
+                    let made = 0;
+                    for (const [key, idxs] of groups) {
+                        const nm = await uniqueSheetName(ctx, key);
+                        const ws = ctx.workbook.worksheets.add(nm);
+                        const vals = [header].concat(idxs.map(i => src.values[i]));
+                        const fmts = [src.numberFormat[0]].concat(idxs.map(i => src.numberFormat[i]));
+                        const rg = ws.getRangeByIndexes(0, 0, vals.length, header.length);
+                        rg.numberFormat = fmts;
+                        rg.values = vals;
+                        ws.getRangeByIndexes(0, 0, 1, header.length).format.font.bold = true;
+                        rg.format.autofitColumns();
+                        made++;
+                        if (made % 10 === 0) await ctx.sync();
+                    }
+                    await ctx.sync();
+                    showStatus(`Created ${made} sheet(s).`);
+                });
+            } catch (e) { showStatus("Split Error: " + e.message, true); }
+        }
+
+        /* ---------- TOOLS: PRINT SETUP ---------- */
+        async function executePrintSetup() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const range = ctx.workbook.getSelectedRange();
+                    const sheet = ctx.workbook.worksheets.getActiveWorksheet();
+                    const pl = sheet.pageLayout;
+                    pl.setPrintArea(range);
+                    pl.paperSize = Excel.PaperType.a4;
+                    pl.orientation = document.getElementById('print-orient').value === 'Landscape' ? Excel.PageOrientation.landscape : Excel.PageOrientation.portrait;
+                    pl.zoom = { horizontalFitToPages: 1, verticalFitToPages: 1 };
+                    pl.centerHorizontally = true;
+                    pl.leftMargin = 36; pl.rightMargin = 36; pl.topMargin = 36; pl.bottomMargin = 36;
+                    await ctx.sync();
+                    showStatus("Page ready. Press Ctrl+P and choose Save as PDF.");
+                });
+            } catch (e) { showStatus("Print Setup Error: " + e.message, true); }
+        }
+
+        /* ---------- TOOLS: WORKBOOK UTILITIES ---------- */
+        async function createSheetIndex() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const sheets = ctx.workbook.worksheets;
+                    sheets.load('items/name,items/visibility');
+                    await ctx.sync();
+                    const idxName = await uniqueSheetName(ctx, 'Sheet_Index');
+                    const ws = sheets.add(idxName);
+                    ws.getRange('A1:B1').values = [['Sheet', 'Status']];
+                    ws.getRange('A1:B1').format.font.bold = true;
+                    let row = 2;
+                    sheets.items.forEach(s => {
+                        const cell = ws.getRange('A' + row);
+                        cell.hyperlink = { documentReference: `${qs(s.name)}!A1`, textToDisplay: s.name, screenTip: 'Go to ' + s.name };
+                        ws.getRange('B' + row).values = [[s.visibility === 'Visible' ? 'Visible' : s.visibility]];
+                        row++;
+                    });
+                    ws.getRange('A:B').format.autofitColumns();
+                    ws.activate();
+                    await ctx.sync();
+                    showStatus(`Index "${idxName}" created with ${sheets.items.length} links.`);
+                });
+            } catch (e) { showStatus("Index Error: " + e.message, true); }
+        }
+
+        async function unhideAllSheets() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const sheets = ctx.workbook.worksheets;
+                    sheets.load('items/name,items/visibility');
+                    await ctx.sync();
+                    let n = 0;
+                    sheets.items.forEach(s => { if (s.visibility !== 'Visible') { s.visibility = Excel.SheetVisibility.visible; n++; } });
+                    await ctx.sync();
+                    showStatus(n ? `Unhid ${n} sheet(s).` : "No hidden sheets.");
+                });
+            } catch (e) { showStatus("Unhide Error: " + e.message, true); }
+        }
+
+        async function deleteBlankRows() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const sheet = ctx.workbook.worksheets.getActiveWorksheet();
+                    const ur = sheet.getUsedRange(true);
+                    ur.load(['formulas', 'rowIndex']);
+                    await ctx.sync();
+                    const blank = [];
+                    ur.formulas.forEach((row, i) => { if (row.every(f => f === '' || f === null)) blank.push(ur.rowIndex + i + 1); });
+                    if (!blank.length) { showStatus("No blank rows found."); return; }
+                    // group consecutive rows, delete bottom-up
+                    const runs = [];
+                    blank.forEach(rn => { const last = runs[runs.length - 1]; if (last && last[1] === rn - 1) last[1] = rn; else runs.push([rn, rn]); });
+                    for (let i = runs.length - 1; i >= 0; i--) sheet.getRange(`${runs[i][0]}:${runs[i][1]}`).delete(Excel.DeleteShiftDirection.up);
+                    await ctx.sync();
+                    showStatus(`Deleted ${blank.length} blank row(s).`);
+                });
+            } catch (e) { showStatus("Delete Rows Error: " + e.message, true); }
+        }
+
+        async function deleteBlankCols() {
+            if (!checkOffice()) return;
+            try {
+                await Excel.run(async (ctx) => {
+                    const sheet = ctx.workbook.worksheets.getActiveWorksheet();
+                    const ur = sheet.getUsedRange(true);
+                    ur.load(['formulas', 'columnIndex', 'columnCount']);
+                    await ctx.sync();
+                    const blank = [];
+                    for (let c = 0; c < ur.columnCount; c++) {
+                        if (ur.formulas.every(row => row[c] === '' || row[c] === null)) blank.push(ur.columnIndex + c);
+                    }
+                    if (!blank.length) { showStatus("No blank columns found."); return; }
+                    for (let i = blank.length - 1; i >= 0; i--) { const L = colLetter(blank[i]); sheet.getRange(`${L}:${L}`).delete(Excel.DeleteShiftDirection.left); }
+                    await ctx.sync();
+                    showStatus(`Deleted ${blank.length} blank column(s).`);
+                });
+            } catch (e) { showStatus("Delete Columns Error: " + e.message, true); }
+        }
+
+        /* ---------- MASK ---------- */
+        function maskValue(type, s) {
+            switch (type) {
+                case 'email': {
+                    const p = s.split('@');
+                    if (p.length !== 2 || !p[0]) return null;
+                    const n = p[0];
+                    return (n.length > 2 ? n[0] + '*'.repeat(n.length - 2) + n[n.length - 1] : '*'.repeat(n.length)) + '@' + p[1];
+                }
+                case 'phone': {
+                    const d = s.replace(/\D/g, '');
+                    if (!d) return null;
+                    return d.length > 4 ? '*'.repeat(d.length - 4) + d.slice(-4) : '*'.repeat(d.length);
+                }
+                case 'pan': return /^[A-Z]{5}\d{4}[A-Z]$/i.test(s) ? '******' + s.slice(-4).toUpperCase() : null;
+                case 'gstin': return /^\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]$/i.test(s) ? s.slice(0, 2) + '*'.repeat(10) + s.slice(-3).toUpperCase() : null;
+                case 'aadhaar': { const d = s.replace(/[\s-]/g, ''); return /^\d{12}$/.test(d) ? '**** **** ' + d.slice(-4) : null; }
+                case 'bank': { const d = s.replace(/[\s-]/g, ''); return /^\d{9,18}$/.test(d) ? '*'.repeat(d.length - 4) + d.slice(-4) : null; }
+                case 'numeric': return /\d/.test(s) ? s.replace(/\d/g, '*') : null;
+                case 'all': return '*'.repeat(s.length);
+            }
+            return null;
+        }
+
         async function executeDataMasking() {
             if (!checkOffice()) return;
             showStatus("Masking sensitive values...");
             try {
-                await Excel.run(async (context) => {
-                    const range = context.workbook.getSelectedRange();
-                    range.load("values");
-                    await context.sync();
-                    
-                    let values = range.values;
-                    if (!values || values.length === 0) {
-                        showStatus("Error: No data found in selection.", true);
-                        return;
-                    }
-                    
-                    const maskType = document.getElementById('mask-type').value;
-                    
-                    for (let r = 0; r < values.length; r++) {
-                        for (let c = 0; c < values[0].length; c++) {
-                            let val = values[r][c];
-                            if (val !== null && val !== undefined && val !== "") {
-                                let strVal = String(val);
-                                if (maskType === 'email') {
-                                    let parts = strVal.split('@');
-                                    if (parts.length === 2) {
-                                        let name = parts[0];
-                                        let domain = parts[1];
-                                        if (name.length > 2) {
-                                            values[r][c] = name[0] + '*'.repeat(name.length - 2) + name[name.length - 1] + '@' + domain;
-                                        } else {
-                                            values[r][c] = '*'.repeat(name.length) + '@' + domain;
-                                        }
-                                    }
-                                } else if (maskType === 'phone') {
-                                    let digits = strVal.replace(/\D/g, '');
-                                    if (digits.length > 4) {
-                                        values[r][c] = '*'.repeat(digits.length - 4) + digits.slice(-4);
-                                    } else {
-                                        values[r][c] = '*'.repeat(strVal.length);
-                                    }
-                                } else if (maskType === 'numeric') {
-                                    values[r][c] = strVal.replace(/\d/g, '*');
-                                } else if (maskType === 'all') {
-                                    values[r][c] = '*'.repeat(strVal.length);
-                                }
-                            }
+                await Excel.run(async (ctx) => {
+                    const range = ctx.workbook.getSelectedRange();
+                    range.load(['values', 'formulas']);
+                    await ctx.sync();
+                    const type = document.getElementById('mask-type').value;
+                    const fm = range.formulas.map(r => r.slice());
+                    let done = 0, skipF = 0, skipN = 0;
+                    for (let r = 0; r < fm.length; r++) {
+                        for (let c = 0; c < fm[0].length; c++) {
+                            const f = fm[r][c];
+                            if (typeof f === 'string' && f.startsWith('=')) { skipF++; continue; }
+                            const val = range.values[r][c];
+                            if (val === '' || val === null || val === undefined) continue;
+                            const out = maskValue(type, String(val).trim());
+                            if (out === null) { skipN++; continue; }
+                            fm[r][c] = out;
+                            done++;
                         }
                     }
-                    range.values = values;
-                    await context.sync();
-                    showStatus("Selected range masked successfully.");
+                    if (!done) { showStatus(`Nothing masked. Formula cells skipped: ${skipF}. Not matching profile: ${skipN}.`, true); return; }
+                    range.formulas = fm; // untouched cells (incl. formulas) are written back unchanged
+                    await ctx.sync();
+                    showStatus(`Masked ${done}. Skipped ${skipF} formula cell(s), ${skipN} not matching the profile.`);
                 });
-            } catch (error) {
-                showStatus("Masking Error: " + error.message, true);
-            }
+            } catch (e) { showStatus("Masking Error: " + e.message, true); }
         }
 
-        /* --- FORMULA FINDER --- */
+        /* ---------- FORMULA FINDER ---------- */
         const fDB = [
-            { t: ["search", "find", "lookup", "vlookup", "xlookup", "match"], f: "=XLOOKUP(lookup_value, lookup_array, return_array, \"Not Found\")", d: "Modern way to search for a value and return a match." },
-            { t: ["sum conditions", "add if", "total multiple"], f: "=SUMIFS(sum_range, criteria_range1, criteria1)", d: "Adds up numbers based on multiple conditions." },
-            { t: ["count conditions", "tally if", "how many"], f: "=COUNTIFS(criteria_range1, criteria1)", d: "Counts cells that meet specific conditions." },
-            { t: ["if error", "hide error", "blank error"], f: "=IFERROR(value, \"\")", d: "Returns a blank or custom text if a formula results in an error." },
-            { t: ["combine text", "join", "merge", "concat"], f: "=TEXTJOIN(\", \", TRUE, text1, text2)", d: "Combines text from multiple cells with a comma separator." },
-            { t: ["if", "condition", "logic", "check"], f: "=IF(logical_test, value_if_true, value_if_false)", d: "Checks if a condition is met." },
-            { t: ["days between", "difference dates"], f: "=NETWORKDAYS(start_date, end_date)", d: "Calculates total working days between two dates." },
-            { t: ["unique", "remove duplicates", "distinct"], f: "=UNIQUE(array)", d: "Returns a list of unique values from a range." },
-            { t: ["drop down", "filter", "sort"], f: "=FILTER(array, include)", d: "Filters a range of data based on criteria you define." }
+            { t: ['lookup', 'xlookup', 'vlookup', 'search value', 'find value', 'fetch', 'get value', 'match value'], f: '=XLOOKUP(lookup_value, lookup_array, return_array, "Not Found")', d: 'Search for a value and return the matching item.' },
+            { t: ['index match', 'two way lookup', 'left lookup'], f: '=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))', d: 'Classic lookup that also works to the left of the key.' },
+            { t: ['sumifs', 'sum condition', 'sum conditions', 'sum if', 'add if', 'total if', 'conditional sum', 'sum by'], f: '=SUMIFS(sum_range, criteria_range1, criteria1)', d: 'Adds numbers that meet one or more conditions.' },
+            { t: ['sum', 'total', 'add up', 'addition'], f: '=SUM(range)', d: 'Adds all numbers in a range.' },
+            { t: ['countifs', 'count condition', 'count conditions', 'count if', 'tally', 'how many'], f: '=COUNTIFS(criteria_range1, criteria1)', d: 'Counts cells that meet conditions.' },
+            { t: ['count', 'counta', 'number of'], f: '=COUNTA(range)', d: 'Counts non-empty cells.' },
+            { t: ['blank', 'blanks', 'empty', 'count blanks'], f: '=COUNTBLANK(range)', d: 'Counts empty cells in a range.' },
+            { t: ['isblank', 'is empty', 'check blank'], f: '=IF(ISBLANK(cell), "Empty", "Filled")', d: 'Checks whether a cell is blank.' },
+            { t: ['average', 'mean', 'avg'], f: '=AVERAGE(range)', d: 'Average of numbers in a range.' },
+            { t: ['maximum', 'max', 'highest', 'largest', 'biggest'], f: '=MAX(range)', d: 'Largest number in a range.' },
+            { t: ['minimum', 'min', 'lowest', 'smallest'], f: '=MIN(range)', d: 'Smallest number in a range.' },
+            { t: ['iferror', 'if error', 'hide error', 'blank error', 'error'], f: '=IFERROR(value, "")', d: 'Returns a blank or custom text if a formula errors.' },
+            { t: ['combine text', 'join', 'merge text', 'concat', 'concatenate', 'textjoin'], f: '=TEXTJOIN(", ", TRUE, text1, text2)', d: 'Combines text from several cells with a separator.' },
+            { t: ['if and', 'if or', 'multiple conditions', 'and or'], f: '=IF(AND(condition1, condition2), value_if_true, value_if_false)', d: 'Tests several conditions together (use OR for any-of).' },
+            { t: ['condition', 'logic', 'check', 'if'], f: '=IF(logical_test, value_if_true, value_if_false)', d: 'Checks if a condition is met.' },
+            { t: ['ifs', 'grade', 'slab', 'many outcomes'], f: '=IFS(condition1, result1, condition2, result2, TRUE, default)', d: 'Several conditions in order, first true wins.' },
+            { t: ['left', 'first characters', 'first letters'], f: '=LEFT(text, num_chars)', d: 'First characters of a text.' },
+            { t: ['right', 'last characters', 'last letters'], f: '=RIGHT(text, num_chars)', d: 'Last characters of a text.' },
+            { t: ['mid', 'middle characters', 'extract text', 'substring'], f: '=MID(text, start_num, num_chars)', d: 'Characters from the middle of a text.' },
+            { t: ['length', 'len', 'characters count'], f: '=LEN(text)', d: 'Number of characters in a text.' },
+            { t: ['trim', 'extra spaces', 'clean spaces'], f: '=TRIM(text)', d: 'Removes extra spaces.' },
+            { t: ['upper', 'uppercase', 'capital letters'], f: '=UPPER(text)', d: 'Converts text to UPPER CASE.' },
+            { t: ['proper', 'title case'], f: '=PROPER(text)', d: 'Capitalizes each word.' },
+            { t: ['replace', 'substitute', 'remove text'], f: '=SUBSTITUTE(text, old_text, new_text)', d: 'Replaces text inside a string.' },
+            { t: ['split', 'textsplit', 'separate text'], f: '=TEXTSPLIT(text, ",")', d: 'Splits text into columns at a delimiter.' },
+            { t: ['round', 'decimal', 'roundoff'], f: '=ROUND(number, 2)', d: 'Rounds a number to given decimals.' },
+            { t: ['today', 'current date', 'now'], f: '=TODAY()', d: 'Today\'s date.' },
+            { t: ['days between', 'difference dates', 'working days', 'networkdays'], f: '=NETWORKDAYS(start_date, end_date)', d: 'Working days between two dates.' },
+            { t: ['month end', 'end of month', 'eomonth'], f: '=EOMONTH(start_date, 0)', d: 'Last day of the month.' },
+            { t: ['age', 'datedif', 'years between', 'months between'], f: '=DATEDIF(start_date, end_date, "Y")', d: 'Complete years (use "M" or "D" for months or days).' },
+            { t: ['format date', 'text format', 'month name'], f: '=TEXT(value, "dd-mmm-yyyy")', d: 'Formats a number or date as text.' },
+            { t: ['unique', 'remove duplicates', 'distinct', 'duplicates'], f: '=UNIQUE(array)', d: 'List of unique values.' },
+            { t: ['filter', 'extract rows', 'show only'], f: '=FILTER(array, include, "None")', d: 'Rows that meet a condition.' },
+            { t: ['sort', 'order', 'ascending', 'descending'], f: '=SORT(array, 1, 1)', d: 'Sorts a range (1 asc, -1 desc).' },
+            { t: ['sumproduct', 'multiply and add', 'weighted'], f: '=SUMPRODUCT(array1, array2)', d: 'Multiplies matching items and adds them.' },
+            { t: ['rank', 'position'], f: '=RANK.EQ(number, ref, 0)', d: 'Rank of a number in a list.' },
+            { t: ['gst', 'tax amount', 'percentage'], f: '=ROUND(taxable_value * rate, 2)', d: 'Tax on a value, e.g. rate 0.18 for 18% GST.' }
         ];
+        let currentFormula = '';
 
-        let currentFormula = "";
-
-        function searchFormula() {
-            let input = document.getElementById('formula-search').value.toLowerCase();
-            if (!input) return;
-            
-            let bestMatch = fDB[5]; // Default to 'IF'
-            let maxMatches = 0;
-
-            fDB.forEach(item => {
-                let matches = item.t.filter(term => input.includes(term)).length;
-                if (matches > maxMatches) { maxMatches = matches; bestMatch = item; }
+        function scoreEntry(entry, input, words) {
+            let s = 0;
+            entry.t.forEach(term => {
+                if (term.indexOf(' ') >= 0) { if (input.indexOf(term) >= 0) s += 2; }
+                else if (words.some(w => w === term || (w.length >= 4 && term.length >= 4 && (w.startsWith(term) || term.startsWith(w))))) s += 1;
             });
+            return s;
+        }
 
-            currentFormula = bestMatch.f;
-            document.getElementById('f-desc').innerText = bestMatch.d;
-            document.getElementById('f-result').innerText = bestMatch.f;
+        function showFormula(item) {
+            currentFormula = item.f;
+            document.getElementById('f-desc').innerText = item.d;
+            document.getElementById('f-result').innerText = item.f;
             document.getElementById('f-desc').style.display = 'block';
             document.getElementById('f-result').style.display = 'block';
             document.getElementById('f-insert-btn').style.display = 'flex';
         }
 
+        function searchFormula() {
+            const input = document.getElementById('formula-search').value.toLowerCase().trim();
+            if (!input) return;
+            const words = input.match(/[a-z0-9]+/g) || [];
+            const ranked = fDB.map(e => ({ e, s: scoreEntry(e, input, words) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+            const alt = document.getElementById('f-alt');
+            alt.innerHTML = '';
+            if (!ranked.length) {
+                showFormula({ f: '', d: 'No match. Try words like sum, count, lookup, if, join, date, unique, filter.' });
+                document.getElementById('f-result').style.display = 'none';
+                document.getElementById('f-insert-btn').style.display = 'none';
+                alt.style.display = 'none';
+                return;
+            }
+            showFormula(ranked[0].e);
+            const others = ranked.slice(1, 4);
+            if (others.length) {
+                const title = document.createElement('div');
+                title.className = 'alt-title';
+                title.textContent = 'Other suggestions';
+                alt.appendChild(title);
+                others.forEach(o => {
+                    const b = document.createElement('button');
+                    b.className = 'alt-btn';
+                    b.textContent = o.e.f.split('(')[0];
+                    b.onclick = () => showFormula(o.e);
+                    alt.appendChild(b);
+                });
+                alt.style.display = 'block';
+            } else alt.style.display = 'none';
+        }
+
         async function insertFormula() {
             if (!checkOffice()) return;
+            if (!currentFormula) return;
             try {
-                await Excel.run(async (context) => {
-                    const range = context.workbook.getSelectedRange();
-                    range.getCell(0,0).formulas = [[currentFormula]];
-                    await context.sync();
-                    showStatus("Formula inserted! Double click cell to edit.");
+                await Excel.run(async (ctx) => {
+                    const range = ctx.workbook.getSelectedRange();
+                    range.getCell(0, 0).formulas = [[currentFormula]];
+                    await ctx.sync();
+                    showStatus("Formula inserted. Replace the placeholder names (range, criteria...) with real cells.");
                 });
-            } catch (error) { showStatus("Insert Error: " + error.message, true); }
+            } catch (e) { showStatus("Insert Error: " + e.message, true); }
         }
     </script>
 </body>
