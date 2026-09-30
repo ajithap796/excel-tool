@@ -76,7 +76,7 @@
         <bt:Url id="TaskpaneUrl" DefaultValue="https://ajithap796.github.io/excel-tool/index.html" />
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GroupLabel" DefaultValue="Excel Mastery" />
+        <bt:String id="GroupLabel" DefaultValue="AJ Tool" />
         <bt:String id="ButtonLabel" DefaultValue="AJ Tool" />
       </bt:ShortStrings>
       <bt:LongStrings>
