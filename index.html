@@ -120,7 +120,7 @@
             <img id="hdr-logo" src="image_fd6017.png" alt="AJ Logo" class="header-logo">
         </div>
         <div class="header-text">
-            <h1>AJ Toolkit <span class="version-badge">v5.1.0</span></h1>
+            <h1>AJ Toolkit <span class="version-badge">v5.2.0</span></h1>
             <p>Excel Functions</p>
         </div>
     </div>
@@ -194,17 +194,28 @@
 
             <div class="card">
                 <h2><i data-lucide="file-check-2"></i> 2B vs Books: Summary + Match</h2>
-                <p class="desc">Scan the workbook, confirm sheets and columns, then build an invoice-level match sheet and a linked summary. Tier 1: Date + GSTIN + Name + Invoice No + Taxable + GST. Tier 2: Date + fuzzy Invoice No + fuzzy Name + Taxable.</p>
+                <p class="desc">Scan the workbook, confirm sheets and columns, then build an invoice-level match sheet and a linked summary. Five-tier engine: T1 Taxable+Name+Date, T2 Taxable+Name, T3 Taxable+Date, T4 Invoice+Taxable, T5 Invoice+(GSTIN or Name). Different GSTINs always block a match. Pairs whose amounts differ go to Amount Differs.</p>
                 <button class="btn btn-secondary btn-gap" onclick="scanGSTWorkbook()"><i data-lucide="scan-search"></i><span>Scan Workbook</span></button>
                 <div id="gst-roles"></div>
                 <details class="map-box" id="gst-map-box">
                     <summary>Column mapping (auto-detected, change if wrong)</summary>
                     <div id="gst-map"></div>
                 </details>
+                <div class="form-group">
+                    <label>Matching mode</label>
+                    <select id="gst-tier-mode">
+                        <option value="auto">Auto (Tier 1 to 5 in order)</option>
+                        <option value="tier1">Tier 1: Taxable + Name + Date</option>
+                        <option value="tier2">Tier 2: Taxable + Name</option>
+                        <option value="tier3">Tier 3: Taxable + Date</option>
+                        <option value="tier4">Tier 4: Invoice no + Taxable</option>
+                        <option value="tier5">Tier 5: Invoice no + (GSTIN or Name)</option>
+                    </select>
+                </div>
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Amount tolerance (Rs)</label>
-                        <input type="number" id="gst-tol" value="1" min="0" step="0.5">
+                        <input type="number" id="gst-tol" value="1.5" min="0" step="0.5">
                     </div>
                     <div class="form-group">
                         <label>Output Sheet Name</label>
@@ -348,7 +359,7 @@
         Office.onReady((info) => {
             if (info.host === Office.HostType.Excel) {
                 isOfficeInitialized = true;
-                console.log("Engine Online v5.1.0.");
+                console.log("Engine Online v5.2.0.");
             }
         });
 
@@ -492,6 +503,40 @@
             return prev[n];
         }
         function sim(a, b) { if (a === b) return 1; const mx = Math.max(a.length, b.length); return mx ? 1 - lev(a, b) / mx : 1; }
+        // ---- Recon Engine helpers
+        function engineNorm(raw) {
+            if (!raw) return '';
+            return String(raw).toUpperCase()
+                .replace(/\b(PVT\.?\s*LTD\.?|PRIVATE\s+LIMITED|LIMITED|LTD\.?|LLP|INC\.?|CORP\.?|CO\.?|COMPANY|ENTERPRISES?|TRADING|INDIA|AND|&)\b/g, ' ')
+                .replace(/[^A-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+        function engineInv(raw) {
+            if (!raw) return '';
+            return String(raw).replace(/[^a-zA-Z0-9]/g, '').replace(/^0+/, '').toUpperCase();
+        }
+        function nameSimFast(wa, wb) {
+            if (!wa.size || !wb.size) return 0;
+            let overlap = 0;
+            for (const w of wa) {
+                if (wb.has(w)) { overlap++; continue; }
+                for (const ww of wb) {
+                    if (w.length >= 3 && ww.length >= 3 && (w.startsWith(ww) || ww.startsWith(w))) { overlap += 0.6; break; }
+                }
+            }
+            return overlap / Math.max(wa.size, wb.size);
+        }
+        // Tightened: last 4-8 digits equal, or shorter side has 5+ chars and is contained in the longer
+        function invMatchFast(bn, gn) {
+            if (!bn || !gn) return false;
+            if (bn === gn) return true;
+            for (let len = 4; len <= 8; len++) {
+                if (bn.length < len || gn.length < len) break;
+                const bs = bn.slice(-len), gs = gn.slice(-len);
+                if (bs === gs && /^\d+$/.test(bs)) return true;
+            }
+            const sh = bn.length <= gn.length ? bn : gn, lg = bn.length <= gn.length ? gn : bn;
+            return sh.length >= 5 && lg.includes(sh);
+        }
         function fillSelect(sel, items) {
             sel.innerHTML = '';
             items.forEach(it => { const o = document.createElement('option'); o.value = it.value; o.textContent = it.label; sel.appendChild(o); });
@@ -734,6 +779,9 @@
                 o.nk = o.name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\b(pvt|private|ltd|limited|llp|co|company|inc|the|and|ms)\b/g, ' ').replace(/\s+/g, '');
                 o.ia = o.inv.toUpperCase().replace(/[^A-Z0-9]/g, '');
                 o.iz = o.ia.replace(/(^|[^0-9])0+(?=\d)/g, '$1');
+                o.nn = engineNorm(o.name);
+                o.nw = new Set(o.nn ? o.nn.split(' ').filter(w => w.length > 1) : []);
+                o.ni = engineInv(o.inv);
                 out.push(o);
             }
             return out;
@@ -823,7 +871,7 @@
             const role = k => { const el = document.getElementById('role-' + k); return el ? el.value : ''; };
             if (!role('b2b') || !role('purchase')) { showStatus("Pick the 2B B2B sheet and the Books Purchase sheet.", true); return; }
             let tol = parseFloat(document.getElementById('gst-tol').value);
-            if (isNaN(tol) || tol < 0) tol = 1;
+            if (isNaN(tol) || tol < 0) tol = 1.5;
             const outBase = safeSheetName(document.getElementById('gst-sheet-name').value || 'GST_Reconciliation');
             const matchName = safeSheetName(outBase.substring(0, 25) + '_Match');
             showStatus("Reading sheets and matching invoices...");
@@ -853,50 +901,59 @@
                     const A = data.b2b;
                     const B = data.purchase.concat(data.expense);
 
-                    // ---- Tier 1: exact keys (date, gstin, name, invoice) + amounts within tolerance
-                    const keyOf = o => [o.date, o.gstin, o.nk, o.ia].join('|');
-                    const bMap = new Map();
-                    B.forEach((b, bi) => { const k = keyOf(b); if (!bMap.has(k)) bMap.set(k, []); bMap.get(k).push(bi); });
-                    const usedB = new Set();
-                    const matched = [];
-                    const restA = [];
-                    A.forEach(a => {
-                        const cand = bMap.get(keyOf(a)) || [];
-                        let hit = -1;
-                        for (const bi of cand) {
-                            if (usedB.has(bi)) continue;
-                            const b = B[bi];
-                            if (Math.abs(a.taxable - b.taxable) <= tol && Math.abs(a.gst - b.gst) <= tol) { hit = bi; break; }
-                        }
-                        if (hit >= 0) { usedB.add(hit); matched.push({ a, b: B[hit], type: 'Tier 1 - Exact' }); }
-                        else restA.push(a);
-                    });
-
-                    // ---- Tier 2: same date, fuzzy invoice + fuzzy name, taxable within tolerance
-                    const bucket = new Map();
-                    B.forEach((b, bi) => { if (usedB.has(bi)) return; if (!bucket.has(b.date)) bucket.set(b.date, []); bucket.get(b.date).push(bi); });
-                    const only2B = [];
-                    restA.forEach(a => {
-                        const cand = bucket.get(a.date) || [];
-                        let best = -1, bestSc = 0;
-                        for (const bi of cand) {
-                            if (usedB.has(bi)) continue;
-                            const b = B[bi];
-                            if (Math.abs(a.taxable - b.taxable) > tol) continue;
-                            const ns = sim(a.nk, b.nk); if (ns < 0.75) continue;
-                            const is = sim(a.iz, b.iz); if (is < 0.8) continue;
-                            if (is + ns > bestSc) { bestSc = is + ns; best = bi; }
-                        }
-                        if (best >= 0) { usedB.add(best); matched.push({ a, b: B[best], type: 'Tier 2 - Fuzzy' }); }
-                        else only2B.push(a);
-                    });
-                    const onlyBooks = B.filter((b, bi) => !usedB.has(bi));
+                    // ---- 5-tier engine. A = 2B rows, B = Books rows. Books row drives, 2B rows are candidates.
+                    const mode = document.getElementById('gst-tier-mode').value;
+                    const tiers = mode === 'auto' ? [1, 2, 3, 4, 5] : [parseInt(mode.replace('tier', ''))];
+                    const gBucket = new Map();
+                    A.forEach((a, ai) => { const k = Math.floor(a.taxable); if (!gBucket.has(k)) gBucket.set(k, []); gBucket.get(k).push(ai); });
+                    const near = t => { const out = []; for (let k = Math.floor(t - tol); k <= Math.floor(t + tol); k++) { const l = gBucket.get(k); if (l) for (const x of l) out.push(x); } return out; };
+                    const usedA = new Set(), usedB = new Set();
+                    const matched = [], amtDiff = [];
+                    for (const tier of tiers) {
+                        const pool5 = tier === 5 ? A.map((x, i) => i).filter(i => !usedA.has(i)) : null;
+                        B.forEach((b, bi) => {
+                            if (usedB.has(bi)) return;
+                            const cand = tier === 5 ? pool5 : near(b.taxable);
+                            let best = -1, bestScore = -1e9, bestTax = false;
+                            for (const ai of cand) {
+                                if (usedA.has(ai)) continue;
+                                const a = A[ai];
+                                if (b.gstin && a.gstin && b.gstin !== a.gstin) continue; // different GSTIN blocks every tier
+                                const tax = Math.abs(b.taxable - a.taxable) <= tol;
+                                let nameSim = 0, nameOk = false;
+                                if (b.nn && a.nn) {
+                                    if (b.nn === a.nn) { nameSim = 1; nameOk = true; }
+                                    else { nameSim = nameSimFast(b.nw, a.nw); nameOk = nameSim >= 0.45; }
+                                }
+                                const dateOk = !!(b.date && a.date && b.date === a.date);
+                                const invOk = invMatchFast(b.ni, a.ni);
+                                const gEq = !!(b.gstin && a.gstin && b.gstin === a.gstin);
+                                let hit;
+                                if (tier === 1) hit = tax && nameOk && dateOk;
+                                else if (tier === 2) hit = tax && nameOk;
+                                else if (tier === 3) hit = tax && dateOk;
+                                else if (tier === 4) hit = invOk && tax;
+                                else hit = invOk && (gEq || nameOk);
+                                if (!hit) continue;
+                                const score = nameSim + (gEq ? 0.5 : 0) - Math.abs(b.taxable - a.taxable) * 1e-6;
+                                if (score > bestScore) { bestScore = score; best = ai; bestTax = tax; }
+                            }
+                            if (best >= 0) {
+                                usedA.add(best); usedB.add(bi);
+                                const a = A[best];
+                                if (bestTax && Math.abs(b.gst - a.gst) <= tol) matched.push({ a, b, tier });
+                                else amtDiff.push({ a, b, tier });
+                            }
+                        });
+                    }
+                    const only2B = A.filter((x, ai) => !usedA.has(ai));
+                    const onlyBooks = B.filter((x, bi) => !usedB.has(bi));
 
                     // ---- match sheet
                     const ms = ctx.workbook.worksheets.add(matchName);
                     let r = 0;
                     const ACC = '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)';
-                    const writeSec = (title, headers, rows, fill, amtFrom, amtTo) => {
+                    const writeSec = (title, headers, rows, fill, amtFrom, amtTo, withSplit) => {
                         const w = headers.length;
                         const tr = ms.getRangeByIndexes(r, 0, 1, w);
                         tr.format.fill.color = fill; tr.format.font.bold = true;
@@ -917,72 +974,100 @@
                         totR.format.borders.getItem('EdgeTop').style = 'Continuous';
                         ms.getRangeByIndexes(hdrIdx + 1, amtFrom, rows.length + 1, amtTo - amtFrom + 1).numberFormat = Array(rows.length + 1).fill(Array(amtTo - amtFrom + 1).fill(ACC));
                         const totalRow1 = r + 1;
+                        let portalRow1 = 0, booksRow1 = 0;
+                        if (withSplit) {
+                            // diff columns O..R = 2B minus Books: split into portal-higher (>0) and books-higher (<0)
+                            const pr = Array(w).fill(''), br = Array(w).fill('');
+                            pr[0] = 'Portal (2B) higher'; br[0] = 'Books higher';
+                            for (let ci = 14; ci <= 17; ci++) {
+                                const L = colLetter(ci);
+                                pr[ci] = rows.length ? `=SUMIF(${L}${first}:${L}${last},">0")` : 0;
+                                br[ci] = rows.length ? `=-SUMIF(${L}${first}:${L}${last},"<0")` : 0;
+                            }
+                            const sp = ms.getRangeByIndexes(r + 1, 0, 2, w);
+                            sp.formulas = [pr, br]; sp.format.font.bold = true;
+                            ms.getRangeByIndexes(r + 1, 14, 2, 4).numberFormat = [[ACC, ACC, ACC, ACC], [ACC, ACC, ACC, ACC]];
+                            portalRow1 = r + 2; booksRow1 = r + 3;
+                            r += 2;
+                        }
                         r += 3;
-                        return totalRow1;
+                        return { total: totalRow1, portal: portalRow1, books: booksRow1 };
                     };
 
-                    const mHead = ['Match Type', 'Date', 'GSTIN', 'Name', 'Invoice (2B)', 'Invoice (Books)', 'Taxable 2B', 'Taxable Books', 'CGST 2B', 'CGST Books', 'SGST 2B', 'SGST Books', 'IGST 2B', 'IGST Books', 'Diff Taxable', 'Diff CGST', 'Diff SGST', 'Diff IGST'];
-                    const mRows = matched.map(m => [m.type, m.a.date, m.a.gstin, m.a.name, m.a.inv, m.b.inv, m.a.taxable, m.b.taxable, m.a.cgst, m.b.cgst, m.a.sgst, m.b.sgst, m.a.igst, m.b.igst,
-                        m.a.taxable - m.b.taxable, m.a.cgst - m.b.cgst, m.a.sgst - m.b.sgst, m.a.igst - m.b.igst]);
-                    const uHead = ['Date', 'GSTIN', 'Name', 'Invoice No', 'Taxable', 'CGST', 'SGST', 'IGST', 'Sheet', 'Row'];
-                    const uRow = o => [o.date, o.gstin, o.name, o.inv, o.taxable, o.cgst, o.sgst, o.igst, o.sheet, o.row];
+                    const noteOf = (a, b, extra) => {
+                        const n = [];
+                        if (!a.inv) n.push('Blank invoice no. in 2B');
+                        if (!b.inv) n.push('Blank invoice no. in Books');
+                        if (extra) n.push(extra);
+                        return n.join('; ');
+                    };
+                    const pHead = ['Tier', 'Date', 'GSTIN', 'Name', 'Invoice (2B)', 'Invoice (Books)', 'Taxable 2B', 'Taxable Books', 'CGST 2B', 'CGST Books', 'SGST 2B', 'SGST Books', 'IGST 2B', 'IGST Books', 'Diff Taxable', 'Diff CGST', 'Diff SGST', 'Diff IGST', 'Note'];
+                    const pairRow = (m, extra) => ['Tier ' + m.tier, m.a.date || m.b.date, m.a.gstin || m.b.gstin, m.a.name || m.b.name, m.a.inv, m.b.inv,
+                        m.a.taxable, m.b.taxable, m.a.cgst, m.b.cgst, m.a.sgst, m.b.sgst, m.a.igst, m.b.igst,
+                        m.a.taxable - m.b.taxable, m.a.cgst - m.b.cgst, m.a.sgst - m.b.sgst, m.a.igst - m.b.igst,
+                        noteOf(m.a, m.b, extra || (m.tier >= 4 ? 'Matched on invoice no.' : ''))];
+                    const uHead = ['Date', 'GSTIN', 'Name', 'Invoice No', 'Taxable', 'CGST', 'SGST', 'IGST', 'Sheet', 'Row', 'Note'];
+                    const uRow = o => [o.date, o.gstin, o.name, o.inv, o.taxable, o.cgst, o.sgst, o.igst, o.sheet, o.row, o.inv ? '' : 'Blank invoice no.'];
 
-                    const rowM = writeSec('Matched', mHead, mRows, '#bbf7d0', 6, 17);
-                    const rowU2 = writeSec('In 2B, not in Books', uHead, only2B.map(uRow), '#fde68a', 4, 7);
-                    const rowU3 = writeSec('In Books, not in 2B', uHead, onlyBooks.map(uRow), '#fecaca', 4, 7);
-                    ms.getRange('A:R').format.autofitColumns();
+                    writeSec('Matched', pHead, matched.map(m => pairRow(m)), '#bbf7d0', 6, 17, false);
+                    const secD = writeSec('Amount Differs (paired, amounts differ)', pHead, amtDiff.map(m => pairRow(m, 'Amount gap')), '#fef08a', 6, 17, true);
+                    const secU2 = writeSec('In 2B, not in Books', uHead, only2B.map(uRow), '#fde68a', 4, 7, false);
+                    const secU3 = writeSec('In Books, not in 2B', uHead, onlyBooks.map(uRow), '#fecaca', 4, 7, false);
+                    ms.getRange('A:S').format.autofitColumns();
 
-                    // ---- summary sheet
+                    // ---- summary sheet (26 rows: row 16 = books-higher line added)
                     const ss = ctx.workbook.worksheets.add(outBase);
                     const labels = [
                         ['PARTICULARS', 'Taxable Value', 'CGST', 'SGST', 'IGST'],
                         ['Input invoices as per accounts (Purchase)'], ['Input invoices as per accounts (Expense)'], ['Less: Credit note as per accounts'], ['Less: RCM Expenses'], ['Net input as per accounts'], [''],
-                        ['Add:'], ['Input invoices in 2B not in accounts'], ['Reverse Charge'], ['Expenses'], ['Amount Difference In Accounts'], [''],
-                        ['Less:'], ['Input invoices in accounts not in 2B'], ['Input invoice Amended'], [''],
+                        ['Add:'], ['Input invoices in 2B not in accounts'], ['Reverse Charge'], ['Expenses'], ['Amount Difference (2B higher)'], [''],
+                        ['Less:'], ['Input invoices in accounts not in 2B'], ['Amount Difference (Books higher)'], ['Input invoice Amended'], [''],
                         ['Input invoices as per calculation'], ['Input invoices in 2B'], ['Add: Expenses'], ['Less: Credit notes in 2B'], ['Less: RCM Expense'], [''],
                         ['Input invoices as per 2B'], ['Difference']
                     ];
-                    ss.getRange('A1:A25').values = labels.map(x => [x[0]]);
+                    ss.getRange('A1:A26').values = labels.map(x => [x[0]]);
                     ss.getRange('B1:E1').values = [labels[0].slice(1)];
                     ss.getRange('F1').values = [['Source / note']];
 
-                    const S = Array.from({ length: 25 }, () => ['', '', '', '']);
-                    const notes = Array(25).fill('');
+                    const S = Array.from({ length: 26 }, () => ['', '', '', '']);
+                    const notes = Array(26).fill('');
                     const put = (row, t, note) => { S[row - 1] = [t.t, t.c, t.s, t.i]; notes[row - 1] = note; };
                     if (role('purchase')) put(2, sumRows(data.purchase, false), 'Books: ' + role('purchase'));
                     if (role('expense')) put(3, sumRows(data.expense, false), 'Books: ' + role('expense'));
                     if (role('cn')) put(4, sumRows(data.cn, true), 'Books: ' + role('cn'));
                     if (role('rcm')) put(5, sumRows(data.rcm, true), 'Books: ' + role('rcm'));
-                    put(19, sumRows(data.b2b, false), '2B: ' + role('b2b'));
-                    if (role('cdnr')) put(21, sumRows(data.cdnr, true), '2B: ' + role('cdnr'));
-                    put(22, sumRows(data.b2b.filter(x => x.rcm), true), '2B rows flagged Reverse Charge = Y');
+                    put(20, sumRows(data.b2b, false), '2B: ' + role('b2b'));
+                    if (role('cdnr')) put(22, sumRows(data.cdnr, true), '2B: ' + role('cdnr'));
+                    put(23, sumRows(data.b2b.filter(x => x.rcm), true), '2B rows flagged Reverse Charge = Y');
                     const MS = qs(matchName);
                     const U = ['E', 'F', 'G', 'H'], D = ['O', 'P', 'Q', 'R'];
                     for (let c = 0; c < 4; c++) {
                         const L = String.fromCharCode(66 + c);
                         S[5][c] = `=SUM(${L}2:${L}3)-${L}4-${L}5`;
-                        S[8][c] = `=${MS}!${U[c]}${rowU2}`;
-                        S[11][c] = `=${MS}!${D[c]}${rowM}`;
-                        S[14][c] = `=${MS}!${U[c]}${rowU3}`;
-                        S[17][c] = `=${L}6+SUM(${L}9:${L}12)-SUM(${L}15:${L}16)`;
-                        S[23][c] = `=${L}19+${L}20-${L}21-${L}22`;
-                        S[24][c] = `=${L}18-${L}24`;
+                        S[8][c] = `=${MS}!${U[c]}${secU2.total}`;
+                        S[11][c] = `=${MS}!${D[c]}${secD.portal}`;
+                        S[14][c] = `=${MS}!${U[c]}${secU3.total}`;
+                        S[15][c] = `=${MS}!${D[c]}${secD.books}`;
+                        S[18][c] = `=${L}6+SUM(${L}9:${L}12)-SUM(${L}15:${L}17)`;
+                        S[24][c] = `=${L}20+${L}21-${L}22-${L}23`;
+                        S[25][c] = `=${L}19-${L}25`;
                     }
                     notes[8] = 'Match sheet: In 2B, not in Books';
-                    notes[11] = 'Match sheet: 2B minus Books on matched invoices';
+                    notes[11] = 'Match sheet: Amount Differs, 2B higher';
                     notes[14] = 'Match sheet: In Books, not in 2B';
-                    ss.getRange('B2:E25').formulas = S.slice(1);
-                    ss.getRange('F2:F25').values = notes.slice(1).map(x => [x]);
+                    notes[15] = 'Match sheet: Amount Differs, Books higher';
+                    ss.getRange('B2:E26').formulas = S.slice(1);
+                    ss.getRange('F2:F26').values = notes.slice(1).map(x => [x]);
 
                     ss.getRange('A1:F1').format.font.bold = true;
                     ss.getRange('A1:F1').format.borders.getItem('EdgeBottom').style = 'Continuous';
-                    [6, 18, 24, 25].forEach(n => { const rg = ss.getRange(`A${n}:E${n}`); rg.format.font.bold = true; rg.format.fill.color = '#f3f2f1'; rg.format.font.color = '#111827'; });
-                    ss.getRange('B2:E25').numberFormat = Array(24).fill(Array(4).fill(ACC));
+                    [6, 19, 25, 26].forEach(n => { const rg = ss.getRange(`A${n}:E${n}`); rg.format.font.bold = true; rg.format.fill.color = '#f3f2f1'; rg.format.font.color = '#111827'; });
+                    ss.getRange('B2:E26').numberFormat = Array(25).fill(Array(4).fill(ACC));
                     ss.getRange('A:F').format.autofitColumns();
                     ss.activate();
                     await ctx.sync();
-                    const t1 = matched.filter(m => m.type.startsWith('Tier 1')).length;
-                    showStatus(`Done. Matched ${matched.length} (Tier 1: ${t1}, Tier 2: ${matched.length - t1}). In 2B only: ${only2B.length}. In Books only: ${onlyBooks.length}.`);
+                    const tc = [1, 2, 3, 4, 5].map(t => matched.filter(m => m.tier === t).length);
+                    showStatus(`Done. Matched ${matched.length} (T1 ${tc[0]}, T2 ${tc[1]}, T3 ${tc[2]}, T4 ${tc[3]}, T5 ${tc[4]}). Amount differs: ${amtDiff.length}. In 2B only: ${only2B.length}. In Books only: ${onlyBooks.length}.`);
                 });
             } catch (e) { showStatus("GST Build Error: " + e.message, true); }
         }
