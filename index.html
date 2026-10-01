@@ -120,7 +120,7 @@
             <img id="hdr-logo" src="image_fd6017.png" alt="AJ Logo" class="header-logo">
         </div>
         <div class="header-text">
-            <h1>AJ Toolkit <span class="version-badge">v5.0.0</span></h1>
+            <h1>AJ Toolkit <span class="version-badge">v5.1.0</span></h1>
             <p>Excel Functions</p>
         </div>
     </div>
@@ -348,9 +348,18 @@
         Office.onReady((info) => {
             if (info.host === Office.HostType.Excel) {
                 isOfficeInitialized = true;
-                console.log("Engine Online v5.0.0.");
+                console.log("Engine Online v5.1.0.");
             }
         });
+
+        // Compatibility gate: stops early with a clear message if this Excel lacks the API set
+        function needSet(ver, what) {
+            try {
+                if (Office.context.requirements.isSetSupported('ExcelApi', ver)) return true;
+            } catch (e) { return true; }
+            showStatus(`${what} needs Excel API ${ver} or newer. Use Excel 365 (desktop/web) or update Excel.`, true);
+            return false;
+        }
 
         function checkOffice() {
             if (!isOfficeInitialized) {
@@ -581,6 +590,7 @@
 
         async function executeReportFormatting() {
             if (!checkOffice()) return;
+            if (!needSet('1.9', 'Report Prep (filters)')) return;
             const picked = Array.from(document.querySelectorAll('#prep-sheets input:checked')).map(c => c.value);
             if (!picked.length) { showStatus("Load sheets and tick at least one.", true); return; }
             const nDel = Math.max(0, parseInt(document.getElementById('prep-rows').value) || 0);
@@ -808,6 +818,7 @@
 
         async function buildGST() {
             if (!checkOffice()) return;
+            if (!needSet('1.4', '2B vs Books')) return;
             if (!gstScanned) { showStatus("Click Scan Workbook first.", true); return; }
             const role = k => { const el = document.getElementById('role-' + k); return el ? el.value : ''; };
             if (!role('b2b') || !role('purchase')) { showStatus("Pick the 2B B2B sheet and the Books Purchase sheet.", true); return; }
@@ -891,6 +902,7 @@
                         tr.format.fill.color = fill; tr.format.font.bold = true;
                         ms.getRangeByIndexes(r, 0, 1, 1).values = [[`${title} (${rows.length})`]];
                         r++;
+                        const hdrIdx = r;
                         const hr = ms.getRangeByIndexes(r, 0, 1, w);
                         hr.values = [headers]; hr.format.font.bold = true; hr.format.fill.color = '#e5e7eb'; hr.format.font.color = '#111827';
                         r++;
@@ -903,7 +915,7 @@
                         const totR = ms.getRangeByIndexes(r, 0, 1, w);
                         totR.formulas = [tot]; totR.format.font.bold = true;
                         totR.format.borders.getItem('EdgeTop').style = 'Continuous';
-                        ms.getRangeByIndexes(hr.address ? r - rows.length - 1 : 0, amtFrom, rows.length + 2, amtTo - amtFrom + 1).numberFormat = Array(rows.length + 2).fill(Array(amtTo - amtFrom + 1).fill(ACC));
+                        ms.getRangeByIndexes(hdrIdx + 1, amtFrom, rows.length + 1, amtTo - amtFrom + 1).numberFormat = Array(rows.length + 1).fill(Array(amtTo - amtFrom + 1).fill(ACC));
                         const totalRow1 = r + 1;
                         r += 3;
                         return totalRow1;
@@ -999,6 +1011,7 @@
 
         async function executeDynamicPivot() {
             if (!checkOffice()) return;
+            if (!needSet('1.8', 'Pivot tables')) return;
             if (!pivotSrc) { showStatus("Load headers first.", true); return; }
             try {
                 await Excel.run(async (ctx) => {
@@ -1145,6 +1158,7 @@
         /* ---------- TOOLS: PRINT SETUP ---------- */
         async function executePrintSetup() {
             if (!checkOffice()) return;
+            if (!needSet('1.9', 'Page layout')) return;
             try {
                 await Excel.run(async (ctx) => {
                     const range = ctx.workbook.getSelectedRange();
@@ -1165,6 +1179,7 @@
         /* ---------- TOOLS: WORKBOOK UTILITIES ---------- */
         async function createSheetIndex() {
             if (!checkOffice()) return;
+            if (!needSet('1.7', 'Sheet index links')) return;
             try {
                 await Excel.run(async (ctx) => {
                     const sheets = ctx.workbook.worksheets;
@@ -1353,7 +1368,8 @@
 
         function showFormula(item) {
             currentFormula = item.f;
-            document.getElementById('f-desc').innerText = item.d;
+            const modern = /UNIQUE\(|FILTER\(|SORT\(|XLOOKUP\(|TEXTSPLIT\(|IFS\(|TEXTJOIN\(/.test(item.f);
+            document.getElementById('f-desc').innerText = item.d + (modern ? ' (Needs Excel 2019/2021/365; older Excel shows #NAME?)' : '');
             document.getElementById('f-result').innerText = item.f;
             document.getElementById('f-desc').style.display = 'block';
             document.getElementById('f-result').style.display = 'block';
